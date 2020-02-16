@@ -21,6 +21,7 @@ class Work extends CI_Model{
         
     }
     public function delete_data($table, $cond=null){
+        //$data = $this->db->get($table)
         if($cond != null){
             return $this->db->delete($table, $cond);
         }else{
@@ -30,6 +31,21 @@ class Work extends CI_Model{
     public function update_data($table, $data, $cond=null){
             return $this->db->update($table,$data,$cond);
     }
+
+    public function do_upload($path, $file_name ,$img_name=null){
+        $config['upload_path']          = $path;
+        $config['allowed_types']        = 'gif|jpg|png';
+        $config['max_size']             = 1000;
+        $config['max_width']            = 1200;
+        $config['max_height']           = 700;
+        $this->load->library('upload', $config);
+        if ( ! $this->upload->do_upload($file_name))
+            {
+                return false;
+            }else{
+                return true;
+            }
+        }
     
 }
 ?>

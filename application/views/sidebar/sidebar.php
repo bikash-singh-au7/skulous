@@ -27,36 +27,27 @@
                 </li>
                 <li>
                     <a href="#classSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                    <i class="fa fa-cog" id="fa"></i> Class</a>
+                    <i class="fa fa-user" id="fa"></i> Class</a>
                     <ul class="collapse list-unstyled" id="classSubmenu">
-                        <li> <a href=""><i class="fa fa-plus" id="fa"></i>Add Class</a></li>
-                        <li> <a href=""><i class="fa fa-calendar" id="fa"></i>Manage Class</a> </li>    
+                        <li> <a href="<?= base_url('welcome/classes/add')?>"><i class="fa fa-plus" id="fa"></i>Add Class</a></li>
+                        <li> <a href="<?= base_url('welcome/classes/manage')?>"><i class="fa fa-cog" id="fa"></i>Manage Class</a> </li>    
                     </ul>
                 </li>
                 <li>
                     <a href="#subjectSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                    <i class="fa fa-users" id="fa"></i>Subjects</a>
+                    <i class="fa fa-book" id="fa"></i>&nbsp;Subjects</a>
                     <ul class="collapse list-unstyled" id="subjectSubmenu">
-                        <li> <a href=""><i class="fa fa-plus" id="fa"></i>Add Subjects</a></li>
-                        <li> <a href=""><i class="fa fa-calendar" id="fa"></i>Manage Subjects</a> </li>    
+                        <li> <a href="<?= base_url('welcome/subject/add')?>"><i class="fa fa-plus" id="fa"></i>Add Subjects</a></li>
+                        <li> <a href="<?= base_url('welcome/subject/manage')?>"><i class="fa fa-calendar" id="fa"></i>Manage Subjects</a> </li>    
                     </ul>
                 </li>
-                
-                <li>
-                    <a href="#courseSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                    <i class="fa fa-user" id="fa"></i> &nbsp;Courses</a>
-                    <ul class="collapse list-unstyled" id="courseSubmenu">
-                        <li> <a href=""><i class="fa fa-plus" id="fa"></i>Add Courses</a></li>
-                        <li> <a href=""><i class="fa fa-calendar" id="fa"></i>Manage Courses</a> </li>    
-                    </ul>
-                </li>
-                
+       
                 <li>
                     <a href="#batchSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                    <i class="fa fa-dollar-sign" id="fa"></i>&nbsp;&nbsp;&nbsp;Batches</a>
+                    <i class="fa fa-users" id="fa"></i>Batches</a>
                      <ul class="collapse list-unstyled" id="batchSubmenu">
-                        <li> <a href=""><i class="fa fa-plus" id="fa"></i>Add Batches</a></li>
-                        <li> <a href=""><i class="fa fa-calendar" id="fa"></i>Manage Batches</a> </li>    
+                        <li> <a href="<?= base_url('welcome/batch/add')?>"><i class="fa fa-plus" id="fa"></i>Add Batches</a></li>
+                        <li> <a href="<?= base_url('welcome/batch/manage')?>"><i class="fa fa-cog" id="fa"></i>Manage Batches</a> </li>    
                     </ul>
                 </li>
 
@@ -64,8 +55,8 @@
                         <a href="#staffSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                         <i class="fa fa-users" id="fa"></i>Staff/Worker</a>
                         <ul class="collapse list-unstyled" id="staffSubmenu">
-                            <li> <a href=""><i class="fa fa-plus" id="fa"></i>Add Staff/Worker</a></li>
-                            <li> <a href=""><i class="fa fa-calendar" id="fa"></i>Manage Staff/Worker</a> </li>    
+                            <li> <a href="<?= base_url('welcome/staff/add')?>"><i class="fa fa-plus" id="fa"></i>Add Staff/Worker</a></li>
+                            <li> <a href="<?= base_url('welcome/staff/manage')?>"><i class="fa fa-calendar" id="fa"></i>Manage Staff/Worker</a> </li>    
                         </ul>
                     </li>
                        
@@ -74,8 +65,8 @@
                     <a href="#regSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                     <i class="fa fa-graduation-cap" id="fa"></i> Registration</a>
                     <ul class="collapse list-unstyled" id="regSubmenu">
-                        <li> <a href=""><i class="fa fa-plus" id="fa"></i>Add Registration</a></li>
-                        <li> <a href=""><i class="fa fa-calendar" id="fa"></i>Manage Registration</a> </li>    
+                        <li> <a href="<?= base_url('welcome/registration/add')?>"><i class="fa fa-plus" id="fa"></i>Add Registration</a></li>
+                        <li> <a href="<?= base_url('welcome/registration/manage')?>"><i class="fa fa-calendar" id="fa"></i>Manage Registration</a> </li>    
                     </ul>
                 </li>
                 

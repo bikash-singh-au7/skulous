@@ -56,6 +56,12 @@ class SessionSetup extends CI_Controller {
 			}else{
 				$this->load->view("session/add-session");
 				$this->load->view("footer/footer");
+
+				$response["session_name"] = strip_tags(form_error('session_name'));
+				$response["start_session"] = strip_tags(form_error('start_session'));
+				$response["end_session"] = strip_tags(form_error('end_session'));
+				$response['status'] = 0;
+				json_encode($response);
 			}
 		}elseif($action == "manage"){
 			if($subaction == "delete"){

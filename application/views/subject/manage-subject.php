@@ -1,24 +1,19 @@
-<?php 
-    $startSession = date("Y-m-d");
-    $date = getdate(strtotime($startSession));
-    $endSession = (int)$date["year"] + 1 ."-". sprintf("%02d", $date["mon"]). "-" . sprintf("%02d", (int)$date["mday"]-1);
-?>
 <div class="container-fluid">
     <div class="row p-0">
         <div class="col-md-11 m-auto">
             <div class="page-header">
                <div class="inner-content">
-                   <!-- Session Details --> 
+                   <!-- Subject Details --> 
                    <div class="row">
                         <div class="col-md-12 p-0 m-0">
                             <?= $this->session->flashdata("success")?>
                         </div>
                         <div class="col-md-12 p-0 m-0 border">
                             <div class="float-left px-2 py-2">
-                                <span class="text-muted font-weight-bold">Manage Session</span>
+                                <span class="text-muted font-weight-bold">Manage Subject</span>
                             </div>
                             <div class="float-right px-2">
-                                <button class="btn btn-info px-2 my-1" type="button" data-toggle="modal" data-target="#addSession"> <i class="fa fa-plus"></i> Session </button>
+                                <button class="btn btn-info px-2 my-1" type="button" data-toggle="modal" data-target="#addModal"> <i class="fa fa-plus"></i> Subject </button>
                             </div>
                         </div>
                     </div>
@@ -26,34 +21,30 @@
                        <div class="row border">
                         <div class="col-md-12 m-auto p-0 table-responsive">
                             <?php
-                            if(empty($session)){
+                            if(empty($data)){
                                 ?>
-                                    <div class="alert alert-danger rounded-0..">There is no data. Please add first!</div>
+                                    <div class="alert alert-danger rounded-0">There is no data. Please add first!</div>
                                 <?
                             }else {
                                 ?>
                                 <table class="table table-striped table-hover m-0">
                                     <tr>
                                         <th>#Id</th>
-                                        <th>Session Name</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th class="text-center">DOC</th>
+                                        <th>Subject Name</th>
                                         <th>Status</th>
+                                        <th>Comments</th>
+                                        <th class="text-center">DOC</th>
                                         <th colspan=2 class="text-center">Action</th>
                                     </tr>    
                                     <?
-                                        foreach($session as $value){
+                                        foreach($data as $value){
                                             ?>
                                                 <tr>
                                                     <td><?=$value->id?></td>
-                                                    <td><?=$value->session_name?></td>
-                                                    <td><?=date("d-M-Y", strtotime($value->start_session))?></td>
-                                                    <td><?=date("d-M-Y", strtotime($value->end_session))?></td>
-                                                    <td class="text-center"><?=date("d-M-Y h:m:s A")?></td>
+                                                    <td><?=$value->subject_name?></td>
                                                     <td class="text-center">
                                                         <?php
-                                                            if($value->session_status == 1){
+                                                            if($value->subject_status == 1){
                                                                 $status = 1;
                                                                 echo"<span class='badge badge-info'>Active</span>";
                                                             }else{
@@ -62,16 +53,19 @@
                                                             }
                                                         ?>
                                                     </td>
-                                                    <td><button class="btn btn-info px-2 py-1" type="button" data-toggle="modal" data-target="#updateSession<?=$value->id?>"> <i class="fa fa-edit"></i> </button></td>
-                                                    <td><button class="btn btn-danger px-2 py-1" type="button" data-toggle="modal" data-target="#deleteSession<?=$value->id?>"> <i class="fa fa-trash"></i> </button></td>
+                                                    <td><?=$value->comment?></td>
+                                                    <td class="text-center"><?=date("d-M-Y h:m:s A", strtotime($value->created_date))?></td>
+                                                    
+                                                    <td><button class="btn btn-info px-2 py-1" type="button" data-toggle="modal" data-target="#updateModal<?=$value->id?>"> <i class="fa fa-edit"></i> </button></td>
+                                                    <td><button class="btn btn-danger px-2 py-1" type="button" data-toggle="modal" data-target="#deleteModal<?=$value->id?>"> <i class="fa fa-trash"></i> </button></td>
                                                 </tr>
 
                                                 <!--Delete session Modal---->
-                                                <div class="modal fade" id="deleteSession<?=$value->id?>" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                                <div class="modal fade" id="deleteModal<?=$value->id?>" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
                                                         <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h6 class="modal-title" id="deleteSessionlabel">Delete Session</h6>
+                                                            <h6 class="modal-title" id="deleteSessionlabel">Delete Subject</h6>
                                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
                                                             </button>
@@ -81,8 +75,8 @@
                                                             <h5 class="text-muted">Do you want to delete?</h5>
                                                         </div>
                                                         <div class="m-auto pb-2">
-                                                            <form action="<?= base_url('sessionsetup/session/manage/delete/')?>" method="post">
-                                                                <input type="hidden" value="<?= $value->id?>" name="session_id">
+                                                            <form action="<?= base_url('welcome/subject/manage/delete/')?>" method="post">
+                                                                <input type="hidden" value="<?= $value->id?>" name="subject_id">
                                                                 <button type="submit" class="btn btn-danger" name="delSbmt">Delete</button>
                                                                 <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                                                             </form>
@@ -92,47 +86,47 @@
                                                     </div>
                                                 </div>
 
-                                                <!--Update session form---->
-                                                <div class="modal fade" id="updateSession<?=$value->id?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                <!--Update Class form--->
+                                                <div class="modal fade" id="updateModal<?=$value->id?>" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
                                                     <div class="modal-dialog" role="document">
                                                         <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h6 class="modal-title" id="updateSessionlabel">Update Session</h6>
+                                                            <h6 class="modal-title" id="updateModallabel">Update Subject</h6>
                                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                             <span aria-hidden="true">&times;</span>
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form action="<?= base_url('sessionsetup/session/manage/update')?>" method="post" id="updateSessionForm<?=$value->id?>">
+                                                            <form action="<?= base_url('welcome/subject/manage/update')?>" method="post" id="updateForm<?=$value->id?>">
                                                                 <div class="form-group">
-                                                                    <label for="">Session Name <span class="text-danger">*</span></label>
-                                                                    <input type="text" name="session_name" value="<?= $value->session_name?>" class="form-control" placeholder="Enter session name">
-                                                                    <input type="hidden" name="session_id" value="<?= $value->id?>" class="form-control">
+                                                                    <label for="">Subject name <span class="text-danger">*</span></label>
+                                                                    <input type="text" name="subject_name" class="form-control" value="<?= $value->subject_name?>" placeholder="Enter Subject like Phy/Che">
+                                                                    <input type="hidden" name="subject_id" class="form-control" value="<?= $value->id?>">
                                                                 </div>
-                                                                <div class="form-group">
-                                                                    <label for="">Start Session <span class="text-danger">*</span></label>
-                                                                    <input type="date" name="start_session" class="form-control" value="<?= date('Y-m-d', strtotime($value->start_session)); ?>">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label for="">End Session <span class="text-danger">*</span></label>
-                                                                    <input type="date" name="end_session" class="form-control" value="<?= date('Y-m-d', strtotime($value->end_session)); ?>">
-                                                                </div>
+                                                                
                                                                 <div class="form-group">
                                                                     <label for="">Status <span class="text-danger">*</span></label>
-                                                                    <select name="session_status" id="" class="form-control">
+                                                                    <select name="subject_status" id="" class="form-control">
                                                                         <option value="1" <?php if($status==1){echo'selected';} ?> >Active</option>
                                                                         <option value="0" <?php if($status==0){echo'selected';} ?> >Disable</option>
                                                                     </select>
                                                                 </div>
+
+                                                                <div class="form-group">
+                                                                    <label for="">Comment</label>
+                                                                    <input type="text" name="comment" class="form-control" value="<?= $value->comment ?>" placeholder="Comments Here">
+                                                                </div>  
+
                                                             </form>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="submit" class="btn btn-info" name="updtSbmt" form="updateSessionForm<?=$value->id?>">Update</button>
+                                                            <button type="submit" class="btn btn-info" name="updtSbmt" form="updateForm<?=$value->id?>">Update</button>
                                                             <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                                                         </div>
                                                         </div>
                                                     </div>
                                                 </div>
+                                                
                                             <?
                                         }                                    
                                     
@@ -148,35 +142,33 @@
                </div>     
         </div>
 
-        <!--Add session form---->
-        <div class="modal fade" id="addSession" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <!--Add Subject form---->
+        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                 <div class="modal-header">
-                    <h6 class="modal-title" id="addSessionlabel">Add Session</h6>
+                    <h6 class="modal-title" id="addModallabel">Add Subject</h6>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="<?= base_url('sessionsetup/session/add')?>" method="post" id="sessionForm">
+                    <form action="<?= base_url('welcome/subject/add/manage')?>" method="post" id="AddModalForm">
                         <div class="form-group">
-                            <label for="">Session Name <span class="text-danger">*</span></label>
-                            <input type="text" name="session_name" class="form-control" placeholder="Enter session name">
+                            <label for="">Subject name <span class="text-danger">*</span></label>
+                            <input type="text" name="subject_name" class="form-control" value="<?= set_value('subject_name')?>" placeholder="Enter Subject like Phy/Che">
+                            <?= form_error("subject_name")?>
+                        </div>
                             
-                        </div>
                         <div class="form-group">
-                            <label for="">Start Session <span class="text-danger">*</span></label>
-                            <input type="date" name="start_session" class="form-control" value="<?= $startSession; ?>">
-                        </div>
-                        <div class="form-group">
-                            <label for="">End Session <span class="text-danger">*</span></label>
-                            <input type="date" name="end_session" class="form-control" value="<?= $endSession; ?>">
+                            <label for="">Comment</label>
+                            <input type="text" name="comment" class="form-control" value="<?= set_value('comment')?>" placeholder="Comments Here">
+                            <?= form_error("comment")?>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-info" form="sessionForm">Add</button>
+                    <button type="submit" class="btn btn-info" form="AddModalForm">Add</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                 </div>
                 </div>

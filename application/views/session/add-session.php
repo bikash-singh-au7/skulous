@@ -24,7 +24,7 @@
                             </div>
                          </div>
                     </div>
-                    <form method="post" action="<?= base_url('sessionsetup/session/add')?>" class="">
+                    <form method="post" action="<?= base_url('sessionsetup/session/add')?>" class="" id="addForm">
                        <div class="row border pt-2">
                          <div class="col-md-12 m-auto">
                             <div class="form-group">
@@ -54,3 +54,23 @@
 
     </div>
 </div>
+
+
+
+<!---Ajax here-->
+<script>
+    $(document).ready(function(){
+        $("body").on("submit", "#addForm", function(e){
+            e.preventDefault();
+            $.ajax({
+                url: '<?= base_url("sessionsetup/session/add")?>',
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response){
+                    alert(response["html"])
+                }
+            });
+        })
+    });
+</script>

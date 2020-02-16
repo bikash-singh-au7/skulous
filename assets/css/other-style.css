@@ -4,3 +4,12 @@
     font-weight: 500;
     font-size: 15px;
 }
+.profile-pic{
+    height: 100px;
+    width: 100px;
+    border: 2px solid white;
+    border-radius: 100%;
+}
+.div-inline{
+    display: inline-block;
+}
