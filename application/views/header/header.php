@@ -9,6 +9,11 @@
 
     <title>Skulous: Advance School Management System</title>
 
+    <!--Data Table-->
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+    
     
     <!-- Font Awesome JS -->
     <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js"></script>
@@ -31,7 +36,16 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/sidebar-style.css')?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/other-style.css')?>">
 
-    
+    <!--Data Table Jqery-->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#dataTable').DataTable();
+        } );
+    </script>
+
+
 </head>
 
 <body class="bg-light">

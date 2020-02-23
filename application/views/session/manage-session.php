@@ -10,47 +10,44 @@
                <div class="inner-content">
                    <!-- Session Details --> 
                    <div class="row">
-                        <div class="col-md-12 p-0 m-0">
-                            <?= $this->session->flashdata("success")?>
+                        <div class="col-md-12 p-0 m-0" id="alert">
+                            
                         </div>
                         <div class="col-md-12 p-0 m-0 border">
                             <div class="float-left px-2 py-2">
                                 <span class="text-muted font-weight-bold">Manage Session</span>
                             </div>
                             <div class="float-right px-2">
-                                <button class="btn btn-info px-2 my-1" type="button" data-toggle="modal" data-target="#addSession"> <i class="fa fa-plus"></i> Session </button>
+                                <button class="btn btn-info px-2 my-1" type="button" data-toggle="modal" data-target="#addSession" id="addBtn"> <i class="fa fa-plus"></i>Add Session </button>
                             </div>
                         </div>
                     </div>
                     <div class="">
-                       <div class="row border">
-                        <div class="col-md-12 m-auto p-0 table-responsive">
-                            <?php
-                            if(empty($session)){
-                                ?>
-                                    <div class="alert alert-danger rounded-0..">There is no data. Please add first!</div>
-                                <?
-                            }else {
-                                ?>
-                                <table class="table table-striped table-hover m-0">
-                                    <tr>
-                                        <th>#Id</th>
-                                        <th>Session Name</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th class="text-center">DOC</th>
-                                        <th>Status</th>
-                                        <th colspan=2 class="text-center">Action</th>
-                                    </tr>    
-                                    <?
-                                        foreach($session as $value){
-                                            ?>
-                                                <tr>
+                        <div class="row border p-2">
+                            <div class="col-md-12 m-auto p-0 table-responsive">
+                                <table id="dataTable" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>#Id</th>
+                                            <th>Session Name</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th class="text-center">DOC</th>
+                                            <th>Status</th>
+                                            <th class="text-center">Edit</th>
+                                            <th class="text-center">Delete</th>
+                                        </tr> 
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                            foreach($session as $value){
+                                                ?>
+                                                <tr id="row-<?=$value->id?>">
                                                     <td><?=$value->id?></td>
                                                     <td><?=$value->session_name?></td>
                                                     <td><?=date("d-M-Y", strtotime($value->start_session))?></td>
                                                     <td><?=date("d-M-Y", strtotime($value->end_session))?></td>
-                                                    <td class="text-center"><?=date("d-M-Y h:m:s A")?></td>
+                                                    <td class="text-center"><?=date("d-M-Y h:m:s A", strtotime($value->created_date))?></td>
                                                     <td class="text-center">
                                                         <?php
                                                             if($value->session_status == 1){
@@ -62,90 +59,89 @@
                                                             }
                                                         ?>
                                                     </td>
-                                                    <td><button class="btn btn-info px-2 py-1" type="button" data-toggle="modal" data-target="#updateSession<?=$value->id?>"> <i class="fa fa-edit"></i> </button></td>
-                                                    <td><button class="btn btn-danger px-2 py-1" type="button" data-toggle="modal" data-target="#deleteSession<?=$value->id?>"> <i class="fa fa-trash"></i> </button></td>
+                                                    <td><button class="btn btn-info px-2 py-1" onclick="getId('<?= $value->id?>')"> <i class="fa fa-edit"></i> </button></td>
+                                                    <td><button class="btn btn-danger px-2 py-1" onclick="deleteData('<?= $value->id?>')"> <i class="fa fa-trash"></i> </button></td>
                                                 </tr>
-
-                                                <!--Delete session Modal---->
-                                                <div class="modal fade" id="deleteSession<?=$value->id?>" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-                                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                                        <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h6 class="modal-title" id="deleteSessionlabel">Delete Session</h6>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                        <div class="modal-body text-center">
-                                                            <img class="img img-responsive" height=100 src="<?= base_url('assets/images/danger.png')?>" alt="">
-                                                            <h5 class="text-muted">Do you want to delete?</h5>
-                                                        </div>
-                                                        <div class="m-auto pb-2">
-                                                            <form action="<?= base_url('sessionsetup/session/manage/delete/')?>" method="post">
-                                                                <input type="hidden" value="<?= $value->id?>" name="session_id">
-                                                                <button type="submit" class="btn btn-danger" name="delSbmt">Delete</button>
-                                                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                                                            </form>
-                                                            
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!--Update session form---->
-                                                <div class="modal fade" id="updateSession<?=$value->id?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                    <div class="modal-dialog" role="document">
-                                                        <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h6 class="modal-title" id="updateSessionlabel">Update Session</h6>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                            </button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form action="<?= base_url('sessionsetup/session/manage/update')?>" method="post" id="updateSessionForm<?=$value->id?>">
-                                                                <div class="form-group">
-                                                                    <label for="">Session Name <span class="text-danger">*</span></label>
-                                                                    <input type="text" name="session_name" value="<?= $value->session_name?>" class="form-control" placeholder="Enter session name">
-                                                                    <input type="hidden" name="session_id" value="<?= $value->id?>" class="form-control">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label for="">Start Session <span class="text-danger">*</span></label>
-                                                                    <input type="date" name="start_session" class="form-control" value="<?= date('Y-m-d', strtotime($value->start_session)); ?>">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label for="">End Session <span class="text-danger">*</span></label>
-                                                                    <input type="date" name="end_session" class="form-control" value="<?= date('Y-m-d', strtotime($value->end_session)); ?>">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label for="">Status <span class="text-danger">*</span></label>
-                                                                    <select name="session_status" id="" class="form-control">
-                                                                        <option value="1" <?php if($status==1){echo'selected';} ?> >Active</option>
-                                                                        <option value="0" <?php if($status==0){echo'selected';} ?> >Disable</option>
-                                                                    </select>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="submit" class="btn btn-info" name="updtSbmt" form="updateSessionForm<?=$value->id?>">Update</button>
-                                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                                                        </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            <?
-                                        }                                    
-                                    
-                                    ?>                            
-                                </table>
-                                <?   
-                            }                           
-                            
-                            ?>
-                        </div> 
+                                                <?
+                                            } 
+                                        ?>
+                                    </tbody>
+                                </table>   
+                            </div> 
                         </div>   
                     </div>  
                </div>     
+        </div>
+        
+        <!--Delete session Modal---->
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="deleteSessionlabel">Delete Session</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <img class="img img-responsive" height=100 src="<?= base_url('assets/images/danger.png')?>" alt="">
+                    <h5 class="text-muted">Do you want to delete?</h5>
+                </div>
+                <div class="m-auto pb-2">
+                    <form action="" method="post" id="deleteForm">
+                        <input type="hidden" value="" name="session_id" id="delete_session_id">
+                        <button type="submit" class="btn btn-danger" name="delSbmt">Delete</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </form>
+                                                            
+                </div>
+                </div>
+            </div>
+        </div>
+    
+        <!--Update session form---->
+        <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="updateSessionlabel">Update Session</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="" method="post" id="updateForm">
+                        <div class="form-group">
+                            <label for="">Session Name <span class="text-danger">*</span></label>
+                            <input type="text" name="session_name" value="" class="form-control" placeholder="Enter session name" id="update_session_name">
+                            <span class="text-danger" id="e_update_session_name"></span>
+                            <input type="hidden" name="session_id" value="" class="form-control" id="update_session_id">
+                        </div>
+                        <div class="form-group">
+                            <label for="">Start Session <span class="text-danger">*</span></label>
+                            <input type="date" name="start_session" class="form-control" value="" id="update_start_session">
+                            <span class="text-danger" id="e_update_start_session"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="">End Session <span class="text-danger">*</span></label>
+                            <input type="date" name="end_session" class="form-control" value="" id="update_end_session">
+                            <span class="text-danger" id="e_update_end_session"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="">Status <span class="text-danger">*</span></label>
+                            <select name="session_status" class="form-control" id="update_session_status">
+                                <option value="1"> Active</option>
+                                <option value="0"> Disable</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info updateBtn" name="updtSbmt" form="updateForm">Update</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
         </div>
 
         <!--Add session form---->
@@ -159,24 +155,26 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="<?= base_url('sessionsetup/session/add')?>" method="post" id="sessionForm">
+                    <form action="" method="post" id="addForm">
                         <div class="form-group">
-                            <label for="">Session Name <span class="text-danger">*</span></label>
-                            <input type="text" name="session_name" class="form-control" placeholder="Enter session name">
-                            
+                            <label for="">Session name <span class="text-danger">*</span></label>
+                            <input type="text" name="session_name" class="form-control" value="" placeholder="Enter session name" id="add_session_name">
+                            <span class="text-danger" id="e_add_session_name"></span>
                         </div>
                         <div class="form-group">
-                            <label for="">Start Session <span class="text-danger">*</span></label>
-                            <input type="date" name="start_session" class="form-control" value="<?= $startSession; ?>">
+                            <label for="">Session Start Date <span class="text-danger">*</span></label>
+                            <input type="date" name="start_session" class="form-control" value="<?= $startSession; ?>" id="add_start_session">
+                            <span class="text-danger" id="e_add_start_session"></span>
                         </div>
                         <div class="form-group">
-                            <label for="">End Session <span class="text-danger">*</span></label>
-                            <input type="date" name="end_session" class="form-control" value="<?= $endSession; ?>">
+                            <label for="">Session End Date <span class="text-danger">*</span></label>
+                            <input type="date" name="end_session" class="form-control" value="<?= $endSession; ?>" id="add_end_session">
+                            <span class="text-danger" id="e_add_end_session"></span>                            
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-info" form="sessionForm">Add</button>
+                    <button type="submit" class="btn btn-info" form="addForm">Add</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                 </div>
                 </div>
@@ -184,3 +182,146 @@
         </div>
     </div>
 </div>
+
+
+<!---Ajax here-->
+<script>
+
+    //delete
+    function deleteData(id){
+        $("#deleteModal").modal("show");
+        $("#delete_session_id").val(id);
+
+        $("#alert").html("");
+        
+    }
+    
+    $(document).ready(function(){
+        $("body").on("submit", "#deleteForm", function(e){
+            e.preventDefault();
+            $.ajax({
+                url: '<?= base_url("sessionsetup/deleteData")?>',
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response){
+                    $("#"+response["rowId"]).remove();
+                    $("#deleteModal").modal("hide");
+                    $("#alert").html(response["alert"]);
+                }
+            });
+        })
+    });
+
+    //Get id for updating the data
+    function getId(id){
+        $("#updateModal").modal("show");
+        $("#alert").html("");
+        $("#e_update_session_name").html("");
+        $("#e_update_start_session").html("");
+        $("#e_update_end_session").html("");
+        $.ajax({
+                url: '<?= base_url("sessionsetup/getData")?>',
+                type: 'POST',
+                data: {session_id:id},
+                dataType: 'json',
+                success: function(response){
+                    $("#update_session_id").val(response["session_id"]);
+                    $("#update_session_name").val(response["session_name"]);
+                    $("#update_start_session").val(response["start_session"]);
+                    $("#update_session_status option[value="+response["session_status"]+"]").attr('selected', 'selected');
+                    $("#update_end_session").val(response["end_session"]);
+                }
+        });
+    }
+    $(document).ready(function(){
+        $("body").on("submit", "#addForm", function(e){
+            e.preventDefault();
+            $.ajax({
+                url: '<?= base_url("sessionsetup/addSession/manage-add")?>',
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response){
+                    if(response["status"] == 0){
+                        //set error message 
+                        $("#e_add_session_name").html(response["session_name"]);
+                        $("#e_add_start_session").html(response["start_session"]);
+                        $("#e_add_end_session").html(response["end_session"]);
+                    }else if(response["status"] == 1){
+                        //set blank value for error message
+                        $("#e_add_session_name").html("");
+                        $("#e_add_start_session").html("");
+                        $("#e_add_end_session").html("");
+
+                        //set blank value after inserting the value
+                        $("#add_session_name").val("");
+                        $("#add_start_session").val("<?= $startSession?>");
+                        $("#add_end_session").val("<?= $endSession?>");
+                        //hide modal
+                        $("#addSession").modal("hide");
+                        //set message for alert box
+                        $("#alert").html(response["alert"]);
+                        //add new row
+                        $("#dataTable").append(response["lastRow"]);
+
+                    }else{
+                        $("#addSession").modal("hide");
+                        //set blank value after inserting the value
+                        $("#add_session_name").val("");
+                        $("#add_start_session").val("<?= $startSession?>");
+                        $("#add_end_session").val("<?= $endSession?>");
+                        $("#alert").html(response["alert"]);
+                    }
+                }
+            });
+        });
+
+
+        
+        //update
+        $("body").on("submit", "#updateForm", function(e){
+            e.preventDefault();
+            $.ajax({
+                url: '<?= base_url("sessionsetup/updateSession")?>',
+                type: 'POST',
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(response){
+                    if(response["status"] == 0){
+                        //set error message 
+                        $("#e_update_session_name").html(response["session_name"]);
+                        $("#e_update_start_session").html(response["start_session"]);
+                        $("#e_update_end_session").html(response["end_session"]);
+                    }else if(response["status"] == 1){
+                        //set blank value for error message
+                        $("#e_update_session_name").html("");
+                        $("#e_update_start_session").html("");
+                        $("#e_update_end_session").html("");
+
+                        
+                        //set message for alert box
+                        $("#updateModal").modal("hide");
+                        $("#alert").html(response["alert"]);
+                        $("#"+response["rowId"]).html(response["updatedRow"]);
+
+                    }else{
+                        $("#updateModal").modal("hide");
+                        $("#update_session_name").val("");
+                        $("#update_start_session").val("");
+                        $("#update_end_session").val("");
+                        $("#alert").html(response["alert"]);
+                    }
+                }
+            });
+        });
+        
+        $("#addBtn").click(function(){
+            $("#alert").html("");
+        });
+        $(".updateBtn").click(function(){
+            $("#alert").html("");
+        });
+
+    });
+</script>

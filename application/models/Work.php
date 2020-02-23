@@ -10,6 +10,12 @@ class Work extends CI_Model{
         $val = $this->db->insert($table, $data);
         return $val;
     }
+
+    public function get_last_id(){
+        $val = $this->db->insert_id();
+        return $val;
+    }
+
     public function select_data($table, $cond=null){
         if($cond == null){
             $data = $this->db->get($table);

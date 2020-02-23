@@ -1,0 +1,70 @@
+<?php
+    date_default_timezone_set("Asia/Kolkata");
+
+    //It print the data for "select session" page
+    if($action == "add"){
+        foreach($result as $row){
+            ?>
+             <option value="<?= $row->id?>" > <?= date("M/Y", strtotime($row->start_session))."-".date("M/Y", strtotime($row->end_session))?> </option>        
+            <?
+        }
+    
+    }
+
+    //It print the data for "manage session" page when add the new session
+
+    if($action == "manage-add"){
+        foreach($result as $value){
+            ?>
+                <tr id="row-<?=$value->id?>">
+                    <td><?=$value->id?></td>
+                    <td><?=$value->session_name?></td>
+                    <td><?=date("d-M-Y", strtotime($value->start_session))?></td>
+                    <td><?=date("d-M-Y", strtotime($value->end_session))?></td>
+                    <td class="text-center"><?=date("d-M-Y h:m:s A", strtotime($value->created_date))?></td>
+                    <td class="text-center">
+                        <?php
+                            if($value->session_status == 1){
+                                $status = 1;
+                                echo"<span class='badge badge-info'>Active</span>";
+                            }else{
+                                $status = 0;
+                                echo"<span class='badge badge-danger'>Disable</span>";
+                            }
+                        ?>
+                    </td>
+                    <td><button class="btn btn-info px-2 py-1" onclick="getId('<?= $value->id?>')"> <i class="fa fa-edit"></i> </button></td>
+                <td><button class="btn btn-danger px-2 py-1" onclick="deleteData('<?= $value->id?>')"> <i class="fa fa-trash"></i> </button></td>
+                </tr>
+            <?
+        }
+    }
+
+
+    if($action == "update"){
+        foreach($result as $value){
+            ?>
+                
+                <td><?=$value->id?></td>
+                <td><?=$value->session_name?></td>
+                <td><?=date("d-M-Y", strtotime($value->start_session))?></td>
+                <td><?=date("d-M-Y", strtotime($value->end_session))?></td>
+                <td class="text-center"><?=date("d-M-Y h:m:s A", strtotime($value->created_date))?></td>
+                <td class="text-center">
+                    <?php
+                        if($value->session_status == 1){
+                            $status = 1;
+                            echo"<span class='badge badge-info'>Active</span>";
+                        }else{
+                            $status = 0;
+                            echo"<span class='badge badge-danger'>Disable</span>";
+                        }
+                    ?>
+                </td>
+                <td><button class="btn btn-info px-2 py-1" onclick="getId('<?= $value->id?>')"> <i class="fa fa-edit"></i> </button></td>
+                <td><button class="btn btn-danger px-2 py-1" onclick="deleteData('<?= $value->id?>')"> <i class="fa fa-trash"></i> </button></td>
+                
+            <?
+        }
+    }
+?>
