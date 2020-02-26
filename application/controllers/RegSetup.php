@@ -34,7 +34,7 @@ class RegSetup extends CI_Controller {
 		}
     }
     
-    //Add Subject
+    //Add Student
     public function addReg($action = null){
 		if($action == "add"){
 			$this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
@@ -55,9 +55,10 @@ class RegSetup extends CI_Controller {
 			$this->form_validation->set_rules("school","school", "trim");
 			$this->form_validation->set_rules("board","board", "trim");
 			$this->form_validation->set_rules("batch_id","Batch id", "required");
-			$this->form_validation->set_rules("discount","Discount", "trim|numeric");
-			$this->form_validation->set_rules("payment_amount","Payment Amount", "trim|numeric");
-			$this->form_validation->set_rules("payment_date","Payment Date", "");
+			$this->form_validation->set_rules("payble_amount","Payable Amount", "required");
+			$this->form_validation->set_rules("discount","Discount", "trim|numeric|callback_check_discount");
+			$this->form_validation->set_rules("payment_amount","Payment Amount", "trim|numeric|is_natural_no_zero");
+			$this->form_validation->set_rules("payment_date","Payment Date", "trim");
 			$this->form_validation->set_rules("comment","Comment", "trim");
 			if($this->form_validation->run()){
 				$data = [
@@ -80,10 +81,26 @@ class RegSetup extends CI_Controller {
 					"school" => $this->input->post("school"),	
 					"board" => $this->input->post("board"),	
 					"batch_id" => $this->input->post("batch_id"),	
+					"fee_amount" => $this->input->post("fee_amount"),	
 					"discount" => $this->input->post("discount"),	
 					"comment" => $this->input->post("comment")
 				];
 				if($this->work->insert_data("registration", $data)){
+                    $payment_amount = $this->input->post("payment_amount");
+                    if($payment_amount != ""){
+                        $data = [
+                            "session_id" => $this->session->userdata("session_id"),
+                            "reg_id" => $this->work->get_last_id(),
+                            "amount" => $payment_amount,
+                            "payment_date" => $this->input->post("payment_date")
+                        ];
+                        if($this->work->insert_data("payment", $data)){
+                            $response["payment_alert"] = "<div class='alert alert-success rounded-0 border'>Payment successfully added !!</div>";
+                        }else{
+                            $response["payment_alert"] = "<div class='alert alert-danger rounded-0 border'>Payment Faild! Try after some time !</div>";
+                        }
+                    }
+                    
 					$response["alert"] = "<div class='alert alert-success rounded-0 border'>Student successfully added !!</div>";
 					$response["status"] = 1;
 				}else{
@@ -108,6 +125,7 @@ class RegSetup extends CI_Controller {
 				$response["school"] = strip_tags(form_error('school'));
 				$response["board"] = strip_tags(form_error('board'));
 				$response["batch_id"] = strip_tags(form_error('batch_id'));
+				$response["payble_amount"] = strip_tags(form_error('payble_amount'));
 				$response["discount"] = strip_tags(form_error('discount'));
 				$response["comment"] = strip_tags(form_error('comment'));
 				$response["payment_amount"] = strip_tags(form_error('payment_amount'));
@@ -174,64 +192,93 @@ class RegSetup extends CI_Controller {
 		}
     }
     
-    //Update Subject
-	public function updateBatch($row_id=null){
+    //Update Student Data
+	public function updateRegData($row_id=null){
 		$this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
-        $this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
-			$this->form_validation->set_rules("batch_name","Batch Name", "trim|required");
-			$this->form_validation->set_rules("batch_status","Batch Status", "trim|required");
-			$this->form_validation->set_rules("batch_medium","Batch Medium", "trim|required");
-			$this->form_validation->set_rules("batch_seat","Batch Seat", "trim|required");
-			$this->form_validation->set_rules("batch_fee","Batch Fee", "trim|required");
-			$this->form_validation->set_rules("batch_start_date","Batch Starting Date", "trim|required");
-			$this->form_validation->set_rules("batch_start_time","Batch Starting Time", "trim|required");
-			$this->form_validation->set_rules("batch_end_time","Batch End Time", "trim|required");
-			$this->form_validation->set_rules("class_id","Class", "required");
-			$this->form_validation->set_rules("subject_id","Subject", "required");
-			$this->form_validation->set_rules("comment","Comment", "trim");
+        $this->form_validation->set_rules("student_name","Student Name", "trim|required");
+        $this->form_validation->set_rules("gender","Gender", "trim|required");
+        $this->form_validation->set_rules("category","Category", "trim|required");
+        $this->form_validation->set_rules("dob","Dob", "trim|required");
+        $this->form_validation->set_rules("father_name","Father Name", "trim|required");
+        $this->form_validation->set_rules("mother_name","Mother Name", "trim|required");
+        $this->form_validation->set_rules("student_mobile","Student Mobile", "trim|required|numeric|exact_length[10]");
+        $this->form_validation->set_rules("student_email","Student Email", "trim|valid_email");
+        $this->form_validation->set_rules("parent_mobile","Parent Mobile", "trim|numeric|exact_length[10]");
+        $this->form_validation->set_rules("parent_email","Parent Email", "trim|valid_email");
+        $this->form_validation->set_rules("address","Address", "required|trim");
+        $this->form_validation->set_rules("state","State", "required|trim");
+        $this->form_validation->set_rules("dist","Dist", "required|trim");
+        $this->form_validation->set_rules("pin_code","Pin Code", "required|trim");
+        $this->form_validation->set_rules("school","school", "trim");
+        $this->form_validation->set_rules("board","board", "trim");
+        $this->form_validation->set_rules("batch_id","Batch id", "required");
+        $this->form_validation->set_rules("payble_amount","Payable Amount", "required");
+        $this->form_validation->set_rules("discount","Discount", "trim|numeric|callback_check_discount");
+        $this->form_validation->set_rules("payment_amount","Payment Amount", "trim|numeric|is_natural_no_zero");
+        $this->form_validation->set_rules("payment_date","Payment Date", "trim");
+        $this->form_validation->set_rules("comment","Comment", "trim");
 
         if($this->form_validation->run()){
             $data = [
-                "batch_name" => $this->input->post("batch_name"),	
-                "batch_status" => $this->input->post("batch_status"),	
-                "batch_medium" => $this->input->post("batch_medium"),	
-                "batch_seat" => $this->input->post("batch_seat"),	
-                "batch_fee" => $this->input->post("batch_fee"),	
-                "batch_start_date" => $this->input->post("batch_start_date"),	
-                "batch_start_time" => $this->input->post("batch_start_time"),	
-                "batch_end_time" => $this->input->post("batch_end_time"),	
-                "class_id" => $this->input->post("class_id"),	
-                "subject_id" => $this->input->post("subject_id"),	
+                "student_name" => $this->input->post("student_name"),	
+                "gender" => $this->input->post("gender"),	
+                "category" => $this->input->post("category"),	
+                "dob" => $this->input->post("dob"),	
+                "father_name" => $this->input->post("father_name"),	
+                "mother_name" => $this->input->post("mother_name"),	
+                "student_mobile" => $this->input->post("student_mobile"),	
+                "student_email" => $this->input->post("student_email"),	
+                "parent_mobile" => $this->input->post("parent_mobile"),	
+                "parent_email" => $this->input->post("parent_email"),	
+                "address" => $this->input->post("address"),	
+                "state" => $this->input->post("state"),	
+                "dist" => $this->input->post("dist"),	
+                "pin_code" => $this->input->post("pin_code"),	
+                "school" => $this->input->post("school"),	
+                "board" => $this->input->post("board"),	
+                "batch_id" => $this->input->post("batch_id"),	
+                "fee_amount" => $this->input->post("fee_amount"),	
+                "discount" => $this->input->post("discount"),	
                 "comment" => $this->input->post("comment")
             ];
-            if($this->work->update_data("batch", $data, ["id"=>$this->input->post("batch_id")])){
-                $response["alert"] = "<div class='alert alert-success rounded-0 border'>Batch successfully updated !!</div>";
+            if($this->work->update_data("registration", $data, ["id"=>$this->input->post("reg_id")])){
+                $response["alert"] = "<div class='alert alert-success rounded-0 border'>Data successfully updated !!</div>";
                 $response["status"] = 1;
 
                 $data["action"] = "update";
-                $data["result"] = $this->work->select_data("batch", ["id"=>$this->input->post("batch_id")]);
-                $html = $this->load->view("batch/print-row", $data, true);
+                $data["result"] = $this->work->select_data("registration", ["id"=>$this->input->post("reg_id")]);
+                $html = $this->load->view("registration/print-row", $data, true);
 
-                $response["rowId"] = "row-".$this->input->post("batch_id");
+                $response["rowId"] = "row-".$this->input->post("reg_id");
                 $response["updatedRow"] = $html;
 
             }else{
-                $response["alert"] = "<div class='alert alert-danger rounded-0 border'>Batch does't updated !!</div>";
+                $response["alert"] = "<div class='alert alert-danger rounded-0 border'>Data does't updated !!</div>";
                 $response["status"] = 2;
             }
         }else{
+            $response["student_name"] = strip_tags(form_error('student_name'));
+            $response["gender"] = strip_tags(form_error('gender'));
+            $response["category"] = strip_tags(form_error('category'));
+            $response["dob"] = strip_tags(form_error('dob'));
+            $response["father_name"] = strip_tags(form_error('father_name'));
+            $response["mother_name"] = strip_tags(form_error('mother_name'));
+            $response["student_mobile"] = strip_tags(form_error('student_mobile'));
+            $response["student_email"] = strip_tags(form_error('student_email'));
+            $response["parent_mobile"] = strip_tags(form_error('parent_mobile'));
+            $response["parent_email"] = strip_tags(form_error('parent_email'));
+            $response["address"] = strip_tags(form_error('address'));
+            $response["state"] = strip_tags(form_error('state'));
+            $response["dist"] = strip_tags(form_error('dist'));
+            $response["pin_code"] = strip_tags(form_error('pin_code'));
+            $response["school"] = strip_tags(form_error('school'));
+            $response["board"] = strip_tags(form_error('board'));
             $response["batch_id"] = strip_tags(form_error('batch_id'));
-            $response["batch_status"] = strip_tags(form_error('batch_status'));
-            $response["batch_name"] = strip_tags(form_error('batch_name'));
-            $response["batch_medium"] = strip_tags(form_error('batch_medium'));
-            $response["batch_seat"] = strip_tags(form_error('batch_seat'));
-            $response["batch_fee"] = strip_tags(form_error('batch_fee'));
-            $response["batch_start_date"] = strip_tags(form_error('batch_start_date'));
-            $response["batch_start_time"] = strip_tags(form_error('batch_start_time'));
-            $response["batch_end_time"] = strip_tags(form_error('batch_end_time'));
-            $response["class_id"] = strip_tags(form_error('class_id'));
-            $response["subject_id"] = strip_tags(form_error('subject_id'));
+            $response["payble_amount"] = strip_tags(form_error('payble_amount'));
+            $response["discount"] = strip_tags(form_error('discount'));
             $response["comment"] = strip_tags(form_error('comment'));
+            $response["payment_amount"] = strip_tags(form_error('payment_amount'));
+            $response["payment_date"] = strip_tags(form_error('payment_date'));
             $response['status'] = 0;
         }
 
@@ -241,29 +288,39 @@ class RegSetup extends CI_Controller {
     //this function helps to fill the data in update modal
 	public function getData(){
 		date_default_timezone_set("Asia/Kolkata");
-		$id = $this->input->post("batch_id");
-		$data["value"] = $this->work->select_data("batch", ["id"=>$id]);
-		$response["batch_id"] = $data["value"][0]->id;
-		$response["batch_name"] = $data["value"][0]->batch_name;
-		$response["batch_status"] = $data["value"][0]->batch_status;
-		$response["batch_fee"] = $data["value"][0]->batch_fee;
-		$response["batch_medium"] = $data["value"][0]->batch_medium;
-		$response["batch_seat"] = $data["value"][0]->batch_seat;
-		$response["batch_start_date"] = $data["value"][0]->batch_start_date;
-		$response["batch_start_time"] = $data["value"][0]->batch_start_time;
-		$response["batch_end_time"] = $data["value"][0]->batch_end_time;
-		$response["subject_id"] = $data["value"][0]->subject_id;
-		$response["class_id"] = $data["value"][0]->class_id;
+		$id = $this->input->post("reg_id");
+		$data["value"] = $this->work->select_data("registration", ["id"=>$id]);
+		$response["student_name"] = $data["value"][0]->student_name;
+		$response["reg_id"] = $data["value"][0]->id;
+		$response["gender"] = $data["value"][0]->gender;
+		$response["category"] = $data["value"][0]->category;
+		$response["dob"] = $data["value"][0]->dob;
+		$response["father_name"] = $data["value"][0]->father_name;
+		$response["mother_name"] = $data["value"][0]->mother_name;
+		$response["student_mobile"] = $data["value"][0]->student_mobile;
+		$response["student_email"] = $data["value"][0]->student_email;
+		$response["parent_mobile"] = $data["value"][0]->parent_mobile;
+		$response["parent_email"] = $data["value"][0]->parent_email;
+		$response["address"] = $data["value"][0]->address;
+		$response["state"] = $data["value"][0]->state;
+		$response["dist"] = $data["value"][0]->dist;
+		$response["pin_code"] = $data["value"][0]->pin_code;
+		$response["school"] = $data["value"][0]->school;
+		$response["board"] = $data["value"][0]->board;
+		$response["batch_id"] = $data["value"][0]->batch_id;
+//		$response["payble_amount"] = $data["value"][0]->payble_amount;
+		$response["fee_amount"] = $data["value"][0]->fee_amount;
+		$response["discount"] = $data["value"][0]->discount;
 		$response["comment"] = $data["value"][0]->comment;
 		echo json_encode($response);
     }
     
-    //view batch Info
+    //view Registration Info
     public function viewInfo(){
-        $id = $this->input->post("batch_id");
+        $id = $this->input->post("reg_id");
         $data["action"] = "view";
-        $data["data"] = $this->work->select_data("batch", ['id'=>$id]);
-        $html = $this->load->view("batch/print-row", $data, true);
+        $data["data"] = $this->work->select_data("registration", ['id'=>$id]);
+        $html = $this->load->view("registration/print-row", $data, true);
         $response["html"] = $html;
         $response["status"] = 1;
         echo json_encode($response);
@@ -271,16 +328,46 @@ class RegSetup extends CI_Controller {
     
     //Delete data
 	public function deleteData(){
-		$id = $this->input->post("batch_id");
-		if($this->work->delete_data("batch", ["id"=>$id])){
+		$id = $this->input->post("reg_id");
+		if($this->work->delete_data("registration", ["id"=>$id])){
 			$response["rowId"] = "row-".$id;
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Batch deleted successfully !!</div>";
+			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Student deleted successfully !!</div>";
 		}else{
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Batch does't deleted !!</div>";
+			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Student does't deleted !!</div>";
 		}
 		echo json_encode($response);
 	}
-
+// Get Payment
+   public function batchFee(){
+       $batch_id = $this->input->post("batch_id");
+       $data["fee"] = $this->work->select_data("batch",["id"=>$batch_id]);
+       $fee = $data["fee"][0]->batch_fee;
+       $response["fee"]= $fee;
+       echo json_encode($response);
+   } 
+    
+    
+    
+    
+//    Custom validation
+    
+    // Validation for discount amount
+    public function check_discount($amount){
+        if($amount == ""){
+            return true;
+        }elseif(!is_numeric($amount)){
+            $this->form_validation->set_message("check_discount", "Discount amount must be number");
+            return false;
+        }elseif($amount < 0){
+            $this->form_validation->set_message("check_discount", "Discount amount must be greater than 0");
+            return false;
+        }elseif($amount > $this->input->post("fee_amount")){
+            $this->form_validation->set_message("check_discount", "Discount amount must be less than ".$this->input->post("fee_amount"));
+            return false;
+        }else{
+            return true;
+        }
+    }
 
 }
 

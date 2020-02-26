@@ -13,6 +13,9 @@
                         <div class="col-md-12 p-0 m-0" id="alert">
                             
                         </div>
+                        <div class="col-md-12 p-0 m-0" id="payment_alert">
+                            
+                        </div>
                         <div class="col-md-12 p-0 m-0 border">
                             <div class="float-left px-2 py-2">
                                 <span class="text-muted font-weight-bold"> <i class="fa fa-users"></i> Students Registration </span>
@@ -193,8 +196,8 @@
                                 
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="">Select Batch<span class="text-danger">*</span></label>
-                                            <select id="" class="form-control" name="batch_id">
+                                            <label for="" class="font-weight-bold">Select Batch<span class="text-danger">*</span></label>
+                                            <select id="batch_id" class="form-control" name="batch_id">
                                                 <option value="">--Select--</option>
                                                 <?php
                                                     foreach($batch as $value){
@@ -211,15 +214,16 @@
                                    
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label class="font-weight-bold">Batch Fee Amount </label>
-                                            <input type="number" name="fee_amount" placeholder="Total Fee Amount" class="form-control pl-2" readonly> 
-                                            <span class="text-danger" id="e_fee_amount"></span>
+                                            <label class="font-weight-bold">Payble Amount </label>
+                                            <input type="hidden" name="fee_amount" placeholder="Total Fee Amount" class="form-control pl-2" readonly id="fee_amount"> 
+                                            <input type="text" id="payble_amount" name="payble_amount" class="form-control" readonly>
+                                            <span class="text-danger" id="e_payble_amount"></span>
                                         </div> 
                                     </div> 
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="font-weight-bold">Discount </label>
-                                            <input type="number" name="discount" placeholder="Discount Amount" class="form-control pl-2"> 
+                                            <input type="text" name="discount" placeholder="Discount Amount" class="form-control pl-2" id="discount" readonly> 
                                             <span class="text-danger" id="e_discount"></span>
                                         </div> 
                                     </div> 
@@ -255,7 +259,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Payment Amount</label>
-                                                <input type="number" value="" name="amount" class="form-control pl-2" placeholder="Enter Amount"> 
+                                                <input type="number" value="" name="payment_amount" class="form-control pl-2" placeholder="Enter Amount"> 
                                                 <span class="text-danger" id="e_payment_amount"></span>
                                             </div> 
                                         </div> 
@@ -346,6 +350,7 @@
                         $("#e_school").html(response["school"]);
                         $("#e_board").html(response["board"]);
                         $("#e_batch_id").html(response["batch_id"]);
+                        $("#e_payble_amount").html(response["payble_amount"]);
                         $("#e_discount").html(response["discount"]);
                         $("#e_comment").html(response["comment"]);
                         //Payment Detaile
@@ -374,6 +379,7 @@
                         $("#e_school").html("");
                         $("#e_board").html("");
                         $("#e_batch_id").html("");
+                        $("#e_payble_amount").html("");
                         $("#e_discount").html("");
                         $("#e_comment").html("");
                         //Payment Detaile
@@ -385,6 +391,7 @@
                         $(".form-control").val("");
                         //set message for alert box
                         $("#alert").html(response["alert"]);
+                        $("#payment_alert").html(response["payment_alert"]);
                     }else{
                         $(".form-control").val("");
                         $("#alert").html(response["alert"]);
@@ -396,6 +403,33 @@
         $(".form-control").focus(function(){
             $("#alert").html("");
         });
+        
+        
+        
+        //fill batch fee
+        $("#batch_id").on("change", function(){
+            var batchId = $(this).val()
+            if (batchId == ""){
+                $("#fee_amount").val("");
+                $("#discount").attr("readonly", "readonly");
+                $("#payble_amount").val("");
+            }else{
+                $.ajax({
+                    url:"<?= base_url('regsetup/batchFee')?>",
+                    data:{batch_id:batchId},
+                    type:"POST",
+                    dataType:"json",
+                    success:function(response){
+                        $("#fee_amount").val(response["fee"]);
+                        $("#payble_amount").val(response["fee"]);
+                        $("#discount").removeAttr("readonly");
+                    }
+                });
+            }
+            
+        });
+        
+        
         
     });
     
