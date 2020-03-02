@@ -75,24 +75,27 @@
                     </ul>
                 </li>
                 
-                
+                <!--Inquiry Setup-->
                 <li>
                     <a href="#inquirySubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                     <i class="fa fa-cog" id="fa"></i> Inquiry</a>
                     <ul class="collapse list-unstyled" id="inquirySubmenu">
-                        <li> <a href=""><i class="fa fa-plus" id="fa"></i>Add Inquiry</a></li>
-                        <li> <a href=""><i class="fa fa-calendar" id="fa"></i>Manage Inquiry</a> </li>    
+                        <li> <a href="<?= base_url('inquirysetup/inquiry/add')?>"><i class="fa fa-plus" id="fa"></i>Add Inquiry</a></li>
+                        <li> <a href="<?= base_url('inquirysetup/inquiry/manage')?>"><i class="fa fa-calendar" id="fa"></i>Manage Inquiry</a> </li>    
                     </ul>
                 </li>
-                                <li>
+                
+                <!--Payment Setup-->
+                <li>
                     <a href="#paymentSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                      <i class="fa fa-cog" id="fa"></i> Payments</a>
                     <ul class="collapse list-unstyled" id="paymentSubmenu">
-                        <li> <a href=""><i class="fa fa-plus" id="fa"></i>Add Payments</a></li>
-                        <li> <a href=""><i class="fa fa-calendar" id="fa"></i>Manage Payments</a> </li>    
+                        <li> <a href="<?= base_url('paymentsetup/payment/add')?>"><i class="fa fa-plus" id="fa"></i>Add Payments</a></li>
+                        <li> <a href="<?= base_url('paymentsetup/payment/manage')?>"><i class="fa fa-calendar" id="fa"></i>Manage Payments</a> </li>    
                     </ul>
                 </li>
                                 
+                <!--SMS Setup-->
                 <li>
                     <a href="#smsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                     <i class="fa fa-envelope" id="fa"></i> Message/Sms</a>

@@ -26,6 +26,38 @@ class Work extends CI_Model{
         return $data->result();
         
     }
+    public function select_destnict_data($table, $cond=null, $dist="id"){
+        if($cond == null){
+            $query = $this->db->distinct($dist)
+                             ->get($table); // Produces: SELECT DISTINCT * FROM table
+        }else{
+            $this->db->select('*');
+            $this->db->group_by($dist);
+            $this->db->from($table);
+            $this->db->where($cond);
+            $query = $this->db->get();
+//            return $query->result();
+        }
+        return $query->result();
+        
+    }
+//    Search Data
+    public function search_data($table, $cond){
+        $result = $this->db->or_like($cond, "both")
+                           ->get($table)
+                           ->result();
+        return $result;
+    }
+    
+    //Select Sum
+    public function select_sum($table, $cond=null, $col=null){
+        $this->db->where($cond);
+        $this->db->select_sum($col);
+        $query = $this->db->get($table);
+        return $query->result();
+    }
+    
+    
     public function delete_data($table, $cond=null){
         //$data = $this->db->get($table)
         if($cond != null){
@@ -36,6 +68,48 @@ class Work extends CI_Model{
     }
     public function update_data($table, $data, $cond=null){
             return $this->db->update($table,$data,$cond);
+    }
+    
+    //To sending the SMS
+    public function send_sms($mob, $msg=null, $sender=null){
+        if($msg == null){
+            $msg = "Welcome to Skulous Software";
+        }
+        if($sender == null):
+            $sender = "SKULUS";
+        endif;
+        $resPattern = "/^[a-z0-9A-Z]{24}$/";
+        //$msgPattern = "/^[a-z0-9A-Z]{24}$/";
+        /*Send SMS*/
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+          CURLOPT_URL => "http://api.msg91.com/api/sendhttp.php?route=4&sender=$sender&mobiles=$mob&authkey=224991AuVykO8pSsz5b4313bf&encrypt=&message=$msg&flash=&unicode=&afterminutes=&response=&campaign=&country=91",
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => "",
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 30,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => "GET",
+          CURLOPT_SSL_VERIFYHOST => 0,
+          CURLOPT_SSL_VERIFYPEER => 0,
+        ));
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+          //echo "cURL Error #:" . $err;
+          return false;
+        } else {
+          //echo $response;
+          if(preg_match($resPattern, $response)):
+             return true;
+          else:
+             return false;
+          endif;
+        }
     }
 
     public function do_upload($path, $file_name ,$img_name=null){

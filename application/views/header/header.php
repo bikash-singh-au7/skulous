@@ -44,7 +44,9 @@
             $('#dataTable').DataTable();
         } );
     </script>
-
+    <!--Sweet Alert-->
+    <script src="<?= base_url('assets/sweetalert/dist/sweetalert2.js')?>"></script>
+    <link rel="stylesheet" href="<?= base_url('assets/sweetalert/dist/sweetalert2.css')?>">
 
 </head>
 

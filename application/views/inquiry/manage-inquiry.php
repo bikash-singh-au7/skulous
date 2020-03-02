@@ -1,3 +1,7 @@
+<?php
+    date_default_timezone_set("Asia/Kolkata");
+    $today = date("d-m-Y");
+?>
 <div class="container-fluid">
     <div class="row p-0">
         <div class="col-md-11 m-auto">
@@ -10,10 +14,10 @@
                         </div>
                         <div class="col-md-12 p-0 m-0 border">
                             <div class="float-left px-2 py-2">
-                                <span class="text-muted font-weight-bold"> <i class="fa fa-cog"></i> Manage Registration</span>
+                                <span class="text-muted font-weight-bold"> <i class="fa fa-cog"></i> Manage Inquiry</span>
                             </div>
                             <div class="float-right px-2">
-                                <button class="btn btn-info px-2 my-1" type="button" data-toggle="modal" data-target="#addModal" id="addBtn"> <i class="fa fa-plus"></i> Student Registration </button>
+                                <button class="btn btn-info px-2 my-1" type="button" data-toggle="modal" data-target="#addModal" id="addBtn"> <i class="fa fa-plus"></i> New Inquiry</button>
                             </div>
                         </div>
                     </div>
@@ -25,11 +29,12 @@
                                     <tr>
                                         <th>#Id</th>
                                         <th>Name</th>
-                                        <th>Father</th>
-                                        <th>Batch</th>
                                         <th>Mobile</th>
+                                        <th>Subject</th>
+                                        <th>Class</th>
+                                        <th>Purpose</th>
                                         <th>Status</th>
-                                        <th>Reg Date</th>
+                                        <th>Inquiry Date</th>
                                         
                                         <th class="text-center" style="width: 120px">Action</th>
                                     </tr> 
@@ -41,31 +46,44 @@
                                             <tr id="row-<?=$value->id?>">
                                                 <td><?=$value->id?></td>
                                                 <td><?=$value->student_name?></td>
+                                                <td class="text-center"><?= $value->student_mobile; ?></td>
+                                                
                                                 <td class="text-center">
-                                                    <?= $value->father_name; ?>
+                                                    <?php
+                                                        $data = $this->work->select_data("subject", ["id"=>$value->subject_id]);
+                                                        echo $data[0]->subject_name;
+                                                    ?>
                                                 </td>
                                                 <td class="text-center">
                                                     <?php
-                                                        $data = $this->work->select_data("batch", ["id"=>$value->batch_id]);
-                                                        echo $data[0]->batch_name;
+                                                        $data = $this->work->select_data("classes", ["id"=>$value->class_id]);
+                                                        echo $data[0]->class_name;
                                                     ?>
                                                 </td>
-                                                <td class="text-center"> <?= $value->student_mobile?> </td>
+                                                <td class="text-center"> <?= $value->inquiry_purpose?> </td>
                                                 <td class="text-center">
                                                     <?php
                                                         
-                                                        if($value->reg_status == 1){
+                                                        if($value->inquiry_status == 1){
                                                             $status = 1;
-                                                            echo"<span class='badge badge-info'>Active</span>";
+                                                            echo"<button onclick=statusChange('".$value->id."','0') class='badge badge-info rounded-0 border-0'>Resolved</button>";
                                                         }else{
                                                             $status = 0;
-                                                            echo"<span class='badge badge-danger'>Disable</span>";
+                                                            echo"<button onclick=statusChange('".$value->id."','1') class='badge badge-danger rounded-0 border-0'>Pending</button>";
                                                         }
                                                         
                                                     ?>
                                                 </td>
 
-                                                <td class="text-center"><?= date("h:m A", strtotime($value->created_date)) ?></td>
+                                                <td class="text-center">
+                                                    <?php  
+                                                        if(date("d-m-Y", strtotime($value->created_date)) == $today):
+                                                            echo"Today";
+                                                        else:
+                                                            echo date("d-m-Y", strtotime($value->created_date));
+                                                        endif;
+                                                    ?>
+                                                </td>
                                                 
                                                 
                                                 
@@ -76,9 +94,7 @@
                                                     
                                                     <button class="btn btn-danger px-2 py-1" onclick="deleteData('<?= $value->id?>')"> <i class="fa fa-trash"></i> </button>
                                                     
-                                                    <button class="btn btn-warning px-2 py-1" onclick="sendSma('<?= $value->id?>')"> <i class="fa fa-envelope"></i> </button>
-                                                    
-                                                    <button class="btn btn-dark px-2 py-1" onclick="makePayment('<?= $value->id?>')"> <i class="fa fa-rupee-sign"></i> </button>
+                                                    <button class="btn btn-warning px-2 py-1" onclick="sendSms('<?= $value->id?>')"> <i class="fa fa-envelope"></i> </button>
                                                     
                                                 
                                                 </td>
@@ -95,6 +111,32 @@
                </div>     
         </div>
         
+        <!--Status Modal---->
+        <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="deleteModallabel">Update Status</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <img class="img img-responsive" height=100 src="<?= base_url('assets/images/smily.png')?>" alt="">
+                    <h5 class="text-muted">Do you want to update?</h5>
+                </div>
+                <div class="m-auto pb-2">
+                    <form action="" method="post" id="statusForm">
+                        <input type="hidden" value="" name="inquiry_id" id="update_inquiry_id">
+                        <input type="hidden" value="" name="inquiry_status" id="inquiry_status">
+                        <button type="submit" class="btn btn-info" name="">Update</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </form>
+                                                            
+                </div>
+                </div>
+            </div>
+        </div>
         <!--Delete Data Modal---->
         <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
             <div class="modal-dialog" role="document">
@@ -111,7 +153,7 @@
                 </div>
                 <div class="m-auto pb-2">
                     <form action="" method="post" id="deleteForm">
-                        <input type="hidden" value="" name="reg_id" id="delete_reg_id">
+                        <input type="hidden" value="" name="inquiry_id" id="delete_inquiry_id">
                         <button type="submit" class="btn btn-danger" name="delSbmt">Delete</button>
                         <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                     </form>
@@ -123,7 +165,7 @@
 
         <!--Update Modal Form-->
         <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                 <div class="modal-header">
                     <h6 class="modal-title" id="updateModallabel">Update Batch Information</h6>
@@ -132,148 +174,71 @@
                     </button>
                 </div>
                 <div class="modal-body px-5">
-                    <form method="post" action="" class="" id="updateForm" enctype="multipart/form-data" class="bg-white">
+                    <form method="post" action="" class="" id="updateForm" class="bg-white">
                        <div class="bg-white mt-2">
                            <div class="row p-0 bg-white">
                                 <div class="col-md-12 border p-0">
                                     <p class="p-1 text-info bg-light" style=""> <strong> <i class="fa fa-user"></i> Personal Details</strong></p>
                                     <div class="row px-2">
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Student Name <span class="text-danger">*</span></label>
-                                                <input type="text" name="student_name" class="form-control pl-2" value="" placeholder="Student Name" id="student_name">
-                                                <input type="hidden" name="reg_id" class="form-control" value="" id="reg_id">
-                                                <span class="text-danger" id="e_student_name"></span>
+                                                <input type="text" name="student_name" class="form-control pl-2" value="" placeholder="Student Name" id="update_student_name">
+                                                <input type="hidden" name="inquiry_id" class="form-control pl-2" id="update_inquiry_id">
+                                                <span class="text-danger" id="e_update_student_name"></span>
                                             </div> 
                                         </div> 
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Gender <span class="text-danger">*</span></label>     
-                                                <select name="gender" class="form-control" id="gender">
-                                                    <option value="">--Select--</option>
-                                                    <option value="MALE">MALE</option>
-                                                    <option value="FEMALE">FEMALE</option>
-                                                </select>
-                                                <span class="text-danger" id="e_gender"></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Categoty <span class="text-danger">*</span></label>     
-                                                <select name="category" class="form-control" id="category">
-                                                    <option value="">--Select--</option>
-                                                    <option value="GEN">GEN</option>
-                                                    <option value="SC">SC</option>
-                                                    <option value="ST">ST</option>
-                                                    <option value="BC-I">BC-I</option>
-                                                    <option value="BC-II">BC-II</option>
-                                                    <option value="OTHER">OTHER</option>
-                                                </select>
-                                                <span class="text-danger" id="e_category"></span>
-                                            </div>
-                                        </div> 
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Date Of Birth <span class="text-danger">*</span></label>     
-                                                <input type="date" name="dob" value=""  class="form-control m-0" id="dob">
-                                                <span class="text-danger" id="e_dob"></span>
-                                            </div>
-                                        </div>
+                                      
                                         
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Father Name <span class="text-danger">*</span></label>     
-                                                <input type="text" class="form-control" value="" name="father_name" placeholder="Father Name" id="father_name">
-                                                <span class="text-danger" id="e_father_name"></span>
-                                            </div>
-                                        </div> 
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Mother Name <span class="text-danger">*</span></label>     
-                                                <input type="text" class="form-control" value="" name="mother_name" placeholder="Mother Name" id="mother_name">
-                                                <span class="text-danger" id="e_mother_name"></span>
-                                            </div>
-                                        </div> 
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Student Mobile <span class="text-danger">*</span></label>     
-                                                <input type="tel" name="student_mobile" value="" class="form-control" placeholder="8757885800" id="student_mobile">
-                                                <span class="text-danger" id="e_student_mobile"></span>
+                                                <input type="tel" name="student_mobile" value="" class="form-control" placeholder="8757885800" id="update_student_mobile">
+                                                <span class="text-danger" id="e_update_student_mobile"></span>
                                             </div>
                                         </div> 
                                         
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Student Email </label>     
-                                                <input type="email" name="student_email" value="" class="form-control" placeholder="rahul@abc.com" id="student_email">
-                                                <span class="text-danger" id="e_student_email"></span>
+                                                <input type="email" name="student_email" value="" class="form-control" placeholder="rahul@abc.com" id="update_student_email">
+                                                <span class="text-danger" id="e_update_student_email"></span>
                                             </div>
                                         </div> 
                             
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Parent Mobile </label>     
-                                                <input type="tel" name="parent_mobile" value="" class="form-control" placeholder="8757885800" id="parent_mobile">
-                                                <span class="text-danger" id="e_parent_mobile"></span>
-                                            </div>
-                                        </div> 
-                                        
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Parent Email </label>     
-                                                <input type="email" name="parent_email" value="" class="form-control" placeholder="rahul-father@abc.com" id="parent_email">
-                                                <span class="text-danger" id="e_parent_email"></span>
-                                            </div>
-                                        </div>
                             
-                                        <div class="col-md-8">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Address </label>     
-                                                <input type="text" name="address" value="" class="form-control" placeholder="Enter Address" id="address">
-                                                <span class="text-danger" id="e_address"></span>
+                                                <input type="text" name="address" value="" id="update_address" class="form-control" placeholder="Enter Address">
+                                                <span class="text-danger" id="e_update_address"></span>
                                             </div>
                                         </div>  
                                         
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">State <span class="text-danger">*</span></label>  
-                                                <select name="state" class="form-control" id="state">
+                                                <select name="state" class="form-control" id="update_state">
                                                     <option value="">--Select--</option>
                                                     <option value="Bihar">Bihar</option>
                                                     <option value="Jharkhand">Jharkhand</option>
                                                     <option value="UP">UP</option>
                                                 </select>
-                                                <span class="text-danger" id="e_state"></span>
+                                                <span class="text-danger" id="e_update_state"></span>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Dist <span class="text-danger">*</span></label>
-                                                <select name="dist" class="form-control" id="dist">
+                                                <select name="dist" class="form-control" id="update_dist">
                                                     <option value="">-Select-</option>
                                                 </select>
-                                                <span class="text-danger" id="e_dist"></span>
+                                                <span class="text-danger" id="e_update_dist"></span>
                                             </div>
                                         </div>
                                         
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Pin Code <span class="text-danger">*</span></label>  
-                                                <input type="text" name="pin_code" value="" class="form-control" placeholder="Pin Code" id="pin_code">
-                                                <span class="text-danger" id="e_pin_code"></span>
-                                            </div>
-                                        </div>
-                                        
-<!--
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Profile Picture</label>  
-                                                <input type="file" name="profile_pic" class="form-control">
-                                                <span class="text-danger" id="e_profile_pic"></span>
-                                            </div>
-                                        </div> 
--->
-                            
+                                       
+                                       
                                     </div> 
                                 </div>   
                            </div>   
@@ -287,60 +252,78 @@
                                 <div class="col-md-12 border p-0">
                                     <p class="p-1 text-info bg-light" style=""> <strong> <i class="fa fa-bars"></i> Other Details</strong></p>
                                     <div class="row px-2">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">School/College</label>
-                                                <input type="text" value="" name="school" class="form-control pl-2" placeholder="Enter School/College Name" id="school"> 
-                                                <span class="text-danger" id="e_school"></span>
-                                            </div> 
-                                        </div> 
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Board/University</label>
-                                                <input type="text" name="board" value="" class="form-control pl-2" placeholder="Enter Board Name" id="board"> 
-                                                <span class="text-danger" id="e_board"></span>
-                                            </div> 
-                                        </div> 
-                                
-                                    <div class="col-md-4">
+                                        
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="" class="font-weight-bold">Select Batch<span class="text-danger">*</span></label>
-                                            <select id="batch_id" class="form-control" name="batch_id">
+                                            <label for="" class="font-weight-bold">Select Class<span class="text-danger">*</span></label>
+                                            <select id="update_class_id" class="form-control" name="class_id">
                                                 <option value="">--Select--</option>
                                                 <?php
-                                                    foreach($batch as $value){
+                                                    foreach($class as $value){
                                                         ?>
-                                                        <option value="<?= $value->id?>"> <?= $value->batch_name.' ('.date('h:m A', strtotime($value->batch_start_time)).'-'.date('h:m A', strtotime($value->batch_end_time)).')'?> </option>
+                                                        <option value="<?= $value->id?>"> <?= $value->class_name?> </option>
                                                         <?
                                                     }
 
                                                 ?>
                                             </select>
-                                            <span class="text-danger" id="e_batch_id"></span>
+                                            <span class="text-danger" id="e_update_class_id"></span>
                                         </div>
                                     </div>
-                                   
-                                    <div class="col-md-4">
+                                    
+                                    
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label class="font-weight-bold">Payble Amount </label>
-                                            <input type="hidden" name="fee_amount" placeholder="Total Fee Amount" class="form-control pl-2" readonly id="fee_amount"> 
-                                            <input type="text" id="payble_amount" name="payble_amount" class="form-control" readonly>
-                                            <span class="text-danger" id="e_payble_amount"></span>
-                                        </div> 
-                                    </div> 
-                                    <div class="col-md-4">
+                                            <label for="" class="font-weight-bold">Select Subject<span class="text-danger">*</span></label>
+                                            <select id="update_subject_id" class="form-control" name="subject_id">
+                                                <option value="">--Select--</option>
+                                                <?php
+                                                    foreach($subject as $value){
+                                                        ?>
+                                                        <option value="<?= $value->id?>"> <?= $value->subject_name?> </option>
+                                                        <?
+                                                    }
+
+                                                ?>
+                                            </select>
+                                            <span class="text-danger" id="e_update_subject_id"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
                                         <div class="form-group">
-                                            <label class="font-weight-bold">Discount </label>
-                                            <input type="text" name="discount" placeholder="Discount Amount" class="form-control pl-2" id="discount" readonly> 
-                                            <span class="text-danger" id="e_discount"></span>
-                                        </div> 
-                                    </div> 
-                                   
-                                    <div class="col-md-4">
+                                            <label for="" class="font-weight-bold">Select Medium<span class="text-danger">*</span></label>
+                                            <select id="update_medium" class="form-control" name="medium">
+                                                <option value="">--Select--</option>
+                                                <option value="HINDI">HINDI</option>
+                                                <option value="ENGLISH">ENGLISH</option>
+                                                
+                                            </select>
+                                            <span class="text-danger" id="e_update_medium"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="" class="font-weight-bold">Inquiry Purpose</label>
+                                            <input type="text" id="update_inquiry_purpose" name="inquiry_purpose" placeholder="Purpose" class="form-control pl-2"> 
+                                            <span class="text-danger" id="e_update_inquiry_purpose"></span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="font-weight-bold">Remarks </label>
-                                            <input type="text" name="comment" placeholder="Remarks" class="form-control pl-2" id="comment"> 
-                                            <span class="text-danger" id="e_comment"></span>
+                                            <input type="text" name="comment" placeholder="Remarks" class="form-control pl-2" id="update_comment"> 
+                                            <span class="text-danger" id="e_update_comment"></span>
+                                        </div> 
+                                    </div> 
+                                    
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold">Refreances </label>
+                                            <input type="text" id="update_refrence" name="refrence" placeholder="Refrence" class="form-control pl-2"> 
+                                            <span class="text-danger" id="e_update_refrence"></span>
                                         </div> 
                                     </div> 
                                     
@@ -349,6 +332,9 @@
                             
                         </div> 
                        </div>
+                       
+                       
+                       
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -382,7 +368,7 @@
         
         <!--View Data Modal--->
         <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h6 class="modal-title" id="updateModallabel"> <i class="fa fa-eye"></i> Student Information</h6>
@@ -420,7 +406,7 @@
                                 <span class="text-danger" id="e_sender"></span>
                             </div>
                             <div class="form-group">
-                                <input type="hidden" class="form-control" id="sms_reg_id" name='reg_id'>
+                                <input type="hidden" class="form-control" id="sms_inquiry_id" name='inquiry_id'>
                                 <label for="" class="text-muted">Write Message <span class="text-danger">*</span> </label>
                                 <textarea name="message" id="message" cols="30" rows="5" class="form-control"></textarea>
                                 <span class="text-danger" id="e_message"></span>
@@ -445,10 +431,55 @@
 <!---Ajax here-->
 
 <script>
-    
+    //Change Status
+    function statusChange(id, status){
+        $("#statusModal").modal("show");
+        $("#update_inquiry_id").val(id)
+        $("#inquiry_status").val(status)
+    }
+    $("body").on("submit", "#statusForm", function(e){
+        e.preventDefault();
+        $.ajax({
+            url: "<?= base_url('inquirysetup/updateStatus')?>",
+            data: $(this).serialize(),
+            type: "POST",
+            dataType: "json",
+            success: function(response){
+                if(response["status"] == 0){
+                    $("#statusModal").modal("hide");
+                    Swal.fire(
+                      response["alert"],
+                      response["message"],
+                      'error'
+                    )
+                    
+                }else if(response["status"] == 1){
+                    //hide modal box
+                    $("#statusModal").modal("hide");
+
+                    //set message for alert box
+                    Swal.fire(
+                      response["alert"],
+                      response["message"],
+                      'success'
+                    )
+
+                    $("#"+response["rowId"]).html(response["updatedRow"]);
+                }else{
+                    //hide modal
+                    $("#statusModal").modal("hide");
+                    Swal.fire(
+                      response["alert"],
+                      response["message"],
+                      'error'
+                    )
+                }
+            }
+        });
+    });
     //For send sms
-    function sendSma(id){
-        $("#sms_reg_id").val(id);
+    function sendSms(id){
+        $("#sms_inquiry_id").val(id);
         $("#sender").val("");
         $("#message").val("");
         $("#e_message").html("");
@@ -458,7 +489,7 @@
     $("body").on("submit", "#smsForm", function(e){
         e.preventDefault();
         $.ajax({
-            url: "<?= base_url('regsetup/sendsms')?>",
+            url: "<?= base_url('inquirysetup/sendsms')?>",
             data: $(this).serialize(),
             type: "POST",
             dataType: "json",
@@ -501,7 +532,7 @@
         };
     var select = ""
         
-        $("#state").change(function(){
+        $("#update_state").change(function(){
             var val = $(this).val();
             var length = 0;
             if(val == ""){
@@ -513,39 +544,16 @@
             for(i=0; i<length; i++){
                 select+="<option value="+arr[val][i]+">"+arr[val][i]+"</option>";
             }
-            $("#dist").html(select);
+            $("#update_dist").html(select);
         })
-    
-    //fill batch fee
-        $("#batch_id").on("change", function(){
-            var batchId = $(this).val()
-            if (batchId == ""){
-                $("#fee_amount").val("");
-                $("#discount").attr("readonly", "readonly");
-                $("#payble_amount").val("");
-            }else{
-                $.ajax({
-                    url:"<?= base_url('regsetup/batchFee')?>",
-                    data:{batch_id:batchId},
-                    type:"POST",
-                    dataType:"json",
-                    success:function(response){
-                        $("#fee_amount").val(response["fee"]);
-                        $("#payble_amount").val(response["fee"]);
-                        $("#discount").removeAttr("readonly");
-                    }
-                });
-            }
-            
-        });
     
      //view modal
     function viewId(id){
         $("#viewModal").modal("show");  
         $.ajax({
-            url: "<?= base_url('regsetup/viewInfo')?>", //https://jsonplaceholder.typicode.com/users
+            url: "<?= base_url('inquirysetup/viewInfo')?>", //https://jsonplaceholder.typicode.com/users
             type: "POST",
-            data: {reg_id:id},
+            data: {inquiry_id:id},
             dataType: "json",
             beforeSend: function(){
                 $("#loader").show();
@@ -563,23 +571,25 @@
     //delete
     function deleteData(id){
         $("#deleteModal").modal("show");
-        $("#delete_reg_id").val(id);
-        
-        $("#alert").html("");
+        $("#delete_inquiry_id").val(id);
         
     }
     $(document).ready(function(){
         $("body").on("submit", "#deleteForm", function(e){
             e.preventDefault();
             $.ajax({
-                url: '<?= base_url("regsetup/deleteData")?>',
+                url: '<?= base_url("inquirysetup/deleteData")?>',
                 type: 'POST',
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function(response){
                     $("#"+response["rowId"]).remove();
                     $("#deleteModal").modal("hide");
-                    $("#alert").html(response["alert"]);
+                    Swal.fire(
+                      response["alert"],
+                      response["message"],
+                      'success'
+                    )
                 }
             });
         })
@@ -588,76 +598,64 @@
     //Get id for updating the data
     function getId(id){
         $("#updateModal").modal("show");
-        $("#alert").html("");
-        $("#e_student_name").html("");
-        $("#e_gender").html("");
-        $("#e_category").html("");
-        $("#e_dob").html("");
-        $("#e_father_name").html("");
-        $("#e_mother_name").html("");
-        $("#e_student-mobile").html("");
-        $("#e_student_email").html("");
-        $("#e_parent_mobile").html("");
-        $("#e_parent_email").html("");
-        $("#e_address").html("");
-        $("#e_state").html("");
-        $("#e_dist").html("");
-        $("#e_pin_code").html("");
-        $("#e_school_name").html("");
-        $("#e_school").html("");
-        $("#e_board").html("");
-        $("#e_batch_id").html("");
-        $("#e_payble_amount").html("");
-        $("#e_discount").html("");
-        $("#e_comment").html("");
+        $("#e_update_student_name").html("");
+        $("#e_update_student-mobile").html("");
+        $("#e_update_student_email").html("");
+        
+        $("#e_update_address").html("");
+        $("#e_update_state").html("");
+        $("#e_update_dist").html("");
+        
+        $("#e_update_class_id").html("");
+        $("#e_update_subject_id").html("");
+        $("#e_update_medium").html("");
+        $("#e_update_enquiry_purpose").html("");
+        $("#e_update_comment").html("");
+        $("#e_update_refrence").html("");
         $.ajax({
-                url: '<?= base_url("regsetup/getData")?>',
+                url: '<?= base_url("inquirysetup/getData")?>',
                 type: 'POST',
-                data: {reg_id:id},
+                data: {inquiry_id:id},
                 dataType: 'json',
                 success: function(response){
                     //remove selected attribute from select box
-                    $("#gender option").removeAttr("selected")
-                    $("#category option").removeAttr("selected");
-                    $("#state option").removeAttr("selected");
-                    $("#dist option").removeAttr("selected");
+                    $("#update_state option").removeAttr("selected")
+                    $("#update_dist option").removeAttr("selected")
+                    $("#update_class_id option").removeAttr("selected")
+                    $("#update_subject_id option").removeAttr("selected")
+                    $("#update_medium option").removeAttr("selected")
                     
                     
-                    $("#student_name").val(response["student_name"]);
-                    $("#reg_id").val(response["reg_id"]);
-                    $("#gender option[value="+response["gender"]+"]").attr('selected', 'selected');
-                    $("#category option[value="+response["category"]+"]").attr('selected', 'selected');
-                    $("#dob").val(response["dob"]);
-                    $("#father_name").val(response["father_name"]);
-                    $("#mother_name").val(response["mother_name"]);
-                    $("#student_mobile").val(response["student_mobile"]);
-                    $("#student_email").val(response["student_email"]);
-                    $("#parent_mobile").val(response["parent_mobile"]);
-                    $("#parent_email").val(response["parent_email"]);
-                    $("#address").val(response["address"]);
-                    $("#state option[value="+response["state"]+"]").attr('selected', 'selected');
+                    $("#update_inquiry_id").val(response["inquiry_id"]);
+                    $("#update_student_name").val(response["student_name"]);
+                    $("#update_student_mobile").val(response["student_mobile"]);
+                    $("#update_student_email").val(response["student_email"]);
+                    $("#update_address").val(response["address"]);
+                    
+                    $("#update_state option[value="+response["state"]+"]").attr('selected', 'selected');
                     //For district
                     
                     for(i=0; i<arr[response["state"]].length; i++){
                         select+="<option value="+arr[response["state"]][i]+">"+arr[response["state"]][i]+"</option>";
                     }
-                    $("#dist").html(select);
+                    $("#update_dist").html(select);
                     
-                    $("#dist option[value="+response["dist"]+"]").attr('selected', 'selected');
-                    $("#pin_code").val(response["pin_code"]);
-                    $("#school").val(response["school"]);
-                    $("#board").val(response["board"]);
-                    $("#batch_id option[value="+response["batch_id"]+"]").attr('selected', 'selected');
-                    $("#fee_amount").val(response["fee_amount"]);
-                    $("#payble_amount").val(response["fee_amount"]);
-                    $("#discount").val(response["discount"]);
-                    $("#comment").val(response["comment"]);
+                    $("#update_dist option[value="+response["dist"]+"]").attr('selected', 'selected');
+                   
+                    $("#update_class_id option[value="+response["class_id"]+"]").attr('selected', 'selected');
+                    $("#update_subject_id option[value="+response["subject_id"]+"]").attr('selected', 'selected');
+                    $("#update_medium option[value="+response["medium"]+"]").attr('selected', 'selected');
+                    $("#update_inquiry_purpose").val(response["inquiry_purpose"]);
+                    $("#update_comment").val(response["comment"]);
+                    $("#update_refrence").val(response["refrence"]);
+                    
                 }
         });
     }
 
     //Add data
     $(document).ready(function(){
+        //Add Data
         $("body").on("submit", "#addForm", function(e){
             e.preventDefault();
             $.ajax({
@@ -742,58 +740,47 @@
         $("body").on("submit", "#updateForm", function(e){
             e.preventDefault();
             $.ajax({
-                url: '<?= base_url("regsetup/updateRegData")?>',
+                url: '<?= base_url("inquirysetup/updateData")?>',
                 type: 'POST',
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function(response){
                     if(response["status"] == 0){
                         //set error message 
-                        $("#e_student_name").html(response["student_name"]);
-                        $("#e_gender").html(response["gender"]);
-                        $("#e_category").html(response["category"]);
-                        $("#e_dob").html(response["dob"]);
-                        $("#e_father_name").html(response["father_name"]);
-                        $("#e_mother_name").html(response["mother_name"]);
-                        $("#e_student_mobile").html(response["student_mobile"]);
-                        $("#e_student_email").html(response["student_email"]);
-                        $("#e_parent_mobile").html(response["parent_mobile"]);
-                        $("#e_parent_email").html(response["parent_email"]);
-                        $("#e_address").html(response["address"]);
-                        $("#e_state").html(response["state"]);
-                        $("#e_dist").html(response["dist"]);
-                        $("#e_pin_code").html(response["pin_code"]);
-                        $("#e_school").html(response["school"]);
-                        $("#e_board").html(response["board"]);
-                        $("#e_batch_id").html(response["batch_id"]);
-                        $("#e_payble_amount").html(response["payble_amount"]);
-                        $("#e_discount").html(response["discount"]);
-                        $("#e_comment").html(response["comment"]);
+                        $("#e_update_student_name").html(response["student_name"]);
+                        $("#e_update_student_mobile").html(response["student_mobile"]);
+                        $("#e_update_student_email").html(response["student_email"]);
+                        $("#e_update_address").html(response["address"]);
+                        $("#e_update_state").html(response["state"]);
+                        $("#e_update_dist").html(response["dist"]);
+                        $("#e_update_class_id").html(response["class_id"]);
+                        $("#e_update_subject_id").html(response["subject_id"]);
+                        $("#e_update_medium").html(response["medium"]);
+                        $("#e_update_inquiry_purpose").html(response["inquiry_purpose"]);
+                        $("#e_update_comment").html(response["comment"]);
+                        $("#e_update_refrence").html(response["refrence"]);
+                        
                         
                         
                     }else if(response["status"] == 1){
                         //set blank value for error message
-                        $("#e_student_name").html("");
-                        $("#gender option").removeAttr("selected")
-                        $("#category option").removeAttr("selected")
-                        $("#dob").html("");
-                        $("#father_name").html("");
-                        $("#mother_name").html("");
-                        $("#student_mobile").html("");
-                        $("#student_email").html("");
-                        $("#parent_mobile").html("");
-                        $("#parent_email").html("");
-                        $("#address").html("");
+                        $("#e_update_student_name").html("");
+                        $("#e_update_student_email").html("");
+                        $("#e_update_student_mobile").html("");
+                        $("#update_state option").removeAttr("selected")
+                        $("#update_dist option").removeAttr("selected")
+                        $("#update_class_id option").removeAttr("selected")
+                        $("#update_subject_id option").removeAttr("selected")
+                        $("#update_medium option").removeAttr("selected")
+                        
+                        $("#update_address").html("");
+                        $("#update_inquiry_purpose").html("");
+                        $("#update_comment").html("");
+                        $("#update_refrence").html("");
                         
                         
-                        $("#state option").removeAttr("selected")
-                        $("#dist option").removeAttr("selected");
-                        $("#pincode").html("");
-                        $("#school").html("");
-                        $("#board").html("");
-                        $("#batch_id option").removeAttr("selected");
-                        $("#payble_amount").html("");
-                        //set message for alert box
+                        
+                        //hide modal box
                         $("#updateModal").modal("hide");
                         
                         //set message for alert box
@@ -807,17 +794,19 @@
 
                     }else{
                         $("#updateModal").modal("hide");
-                        $("#update_batch_name").val("");
-                        $("#update_batch_status option").removeAttr("selected")
-                        $("#update_batch_medium option").removeAttr("selected");
-                        $("#update_batch_seat").val("");
-                        $("#update_batch_fee").val("");
-                        $("#update_batch_start_date").val("");
-                        $("#update_batch_start_time").val("");
-                        $("#update_batch_end_time").val("");
-                        $("#update_subject_id option").removeAttr("selected");
-                        $("#update_class_id option").removeAttr("selected");
-                        $("#update_comment").val("");
+                        $("#e_update_student_name").html("");
+                        $("#e_update_student_email").html("");
+                        $("#e_update_student_mobile").html("");
+                        $("#update_state option").removeAttr("selected")
+                        $("#update_dist option").removeAttr("selected")
+                        $("#update_class_id option").removeAttr("selected")
+                        $("#update_subject_id option").removeAttr("selected")
+                        $("#update_medium option").removeAttr("selected")
+                        
+                        $("#update_address").html("");
+                        $("#update_inquiry_purpose").html("");
+                        $("#update_comment").html("");
+                        $("#update_refrence").html("");
                         //set message for alert box
                         Swal.fire(
                           response["alert"],

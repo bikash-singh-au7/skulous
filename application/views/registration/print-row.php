@@ -303,8 +303,8 @@ if($action == "view"){
                                                 <div class="col-md-6 border-top">Dues Amount</div>
                                                 <div class="col-md-6 border-top">
                                                 <?php 
-                                                    echo $value->fee_amount."-".$total_payment."+".$value->discount."=";
-                                                    echo $value->fee_amount-$total_payment+$value->discount;
+                                                    echo $value->fee_amount."-(".$total_payment."+".$value->discount.")=";
+                                                    echo $value->fee_amount-($total_payment+$value->discount);
                                                 ?>
                                                 </div>
                                             </div>

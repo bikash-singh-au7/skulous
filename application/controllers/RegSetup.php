@@ -242,8 +242,9 @@ class RegSetup extends CI_Controller {
                 "comment" => $this->input->post("comment")
             ];
             if($this->work->update_data("registration", $data, ["id"=>$this->input->post("reg_id")])){
-                $response["alert"] = "<div class='alert alert-success rounded-0 border'>Data successfully updated !!</div>";
                 $response["status"] = 1;
+                $response["alert"] = "Updated!";
+                $response["message"] = "Data successfully updated.";
 
                 $data["action"] = "update";
                 $data["result"] = $this->work->select_data("registration", ["id"=>$this->input->post("reg_id")]);
@@ -253,7 +254,8 @@ class RegSetup extends CI_Controller {
                 $response["updatedRow"] = $html;
 
             }else{
-                $response["alert"] = "<div class='alert alert-danger rounded-0 border'>Data does't updated !!</div>";
+                $response["alert"] = "Not Updated!";
+                $response["message"] = "Data does't updated.";
                 $response["status"] = 2;
             }
         }else{
@@ -333,7 +335,7 @@ class RegSetup extends CI_Controller {
 			$response["rowId"] = "row-".$id;
 			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Student deleted successfully !!</div>";
 		}else{
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Student does't deleted !!</div>";
+			$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Student does't deleted !!</div>";
 		}
 		echo json_encode($response);
 	}
@@ -346,7 +348,37 @@ class RegSetup extends CI_Controller {
        echo json_encode($response);
    } 
     
-    
+//Send Sms
+    public function sendsms(){
+        $this->form_validation->set_rules("message", "Message", "required|trim");
+        $this->form_validation->set_rules("sender", "Sender Id", "trim|exact_length[6]|alpha");
+        $this->form_validation->set_rules("reg_id", "Registration Id", "required");
+        if($this->form_validation->run()){
+            $data = $this->work->select_data("registration", ["id"=>$this->input->post("reg_id")]);
+            $mobile_number = $data[0]->student_mobile;
+            $student_name = $data[0]->student_name;
+            $msg = $this->input->post("message");
+            $sender = $this->input->post("sender");
+            $msg = str_replace("@name", $student_name, $msg);
+            
+            if($this->work->send_sms($mobile_number, $msg, $sender)){
+                $response["status"] = 1;
+                $response["alert"] = "SMS Send !";
+                $response["message"] = "Wow Message send successfully.";
+            }else{
+                $response["status"] = 2;
+                $response["alert"] = "SMS not send !";
+                $response["message"] = "Oops error occured.";
+            }
+        }else{
+            $response["status"] = 0;
+            $response["message"] = strip_tags(form_error("message"));
+            $response["sender"] = strip_tags(form_error("sender"));
+            $response["reg_id"] = strip_tags(form_error("reg_id"));
+        }
+        echo json_encode($response);
+        
+    }
     
     
 //    Custom validation
