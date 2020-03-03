@@ -25,21 +25,27 @@
                                 
                             </span>
                         </div>
-                        <ul class="nav navbar-nav ml-auto">
-                            <li class="nav-item active">
-                                <a class="nav-link" href="#">Page</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Page</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Page</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Page</a>
-                            </li>
-                        </ul>
+                        
                     </div>
+                    <!-- Admin Sections-->     
+                        <div class="btn-group">
+                           
+                           <?php
+                                $profile_url = base_url("AdminSetup/profile");
+                                $setting_url = base_url("AdminSetup/setting");
+                                $logout_url = base_url("AdminSetup/logout");
+                           ?>
+                           
+                           
+                            <button type="button" class="btn btn-info rounded-0" data-toggle="dropdown"> <i class="fa fa-user"></i> Admin</button>
+                            <div class="dropdown-menu dropdown-menu-right p-0 border-0 shadow-sm rounded-0">
+                                <a href="<?= $profile_url;?>" class="dropdown-item px-3"> <i class="fa fa-user"></i> Profile</a>
+                                <a href="<?= $setting_url;?>" class="dropdown-item px-3"> <i class="fa fa-cog"></i> Setting</a>
+                                <a href="<?= $logout_url;?>" class="dropdown-item px-3"> <span class="fa fa-log-in"></span> Logout</a>
+                            </div>
+                        </div>
                 </div>
             </nav>
+            
+            
             

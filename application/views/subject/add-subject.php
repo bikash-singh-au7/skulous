@@ -24,8 +24,13 @@
                          <div class="col-md-12 m-auto">
                             <div class="form-group">
                                 <label for="">Subject name <span class="text-danger">*</span></label>
-                                <input type="text" name="subject_name" class="form-control" value="" placeholder="Enter Subject like Phy/Che">
+                                <input type="text" name="subject_name" class="form-control" value="" placeholder="Enter Subject like Physics/Chemistry">
                                 <span class="text-danger" id="e_subject_name"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="">Subject Code<span class="text-danger">*</span></label>
+                                <input type="text" name="subject_code" class="form-control" value="" placeholder="Enter Subject Code Phy/Che">
+                                <span class="text-danger" id="e_subject_code"></span>
                             </div>
                             
                             <div class="form-group">
@@ -62,19 +67,22 @@
                     if(response["status"] == 0){
                         //set error message 
                         $("#e_subject_name").html(response["subject_name"]);
+                        $("#e_subject_code").html(response["subject_code"]);
                         $("#e_comment").html(response["comment"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_subject_name").html("");
+                        $("#e_subject_code").html("");
                         $("#e_comment").html("");
 
                         //set blank value after inserting the value
                         $(".form-control").val("");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
-                    }else{
-                        $(".form-control").val("");
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                     }
                 }
             });

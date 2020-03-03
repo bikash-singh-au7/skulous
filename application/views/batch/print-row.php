@@ -146,6 +146,7 @@ if($action == "view"){
                             <h6 class="text-muted">Total Seat:</h6>
                             <h6 class="text-muted">Available Seat:</h6>
                             <h6 class="text-muted">Batch Fee:</h6>
+                            <h6 class="text-muted">Discount:</h6>
                             <h6 class="text-muted">Batch Start Date:</h6>
                             <h6 class="text-muted">Batch Timing:</h6>
                             <h6 class="text-muted">Date of Creation:</h6>
@@ -169,6 +170,7 @@ if($action == "view"){
                                 ?>
                             </h6>
                             <h6 class="text-muted"> <span class="badge badge-info"><?= $value->batch_fee?></span> </h6>
+                            <h6 class="text-muted"> <span class="badge badge-warning"><?= $value->discount?></span> </h6>
                             <h6 class="text-muted"><?= date("d-M-Y", strtotime($value->batch_start_date)) ?></h6>
                             <h6 class="text-muted"><?= date("h:m A", strtotime($value->batch_start_time))."-".date("h:m A", strtotime($value->batch_end_time)) ?></h6>
                             <h6 class="text-muted"><?= date("d-M-Y h:m:s A", strtotime($value->created_date)) ?></h6>

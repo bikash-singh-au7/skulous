@@ -15,16 +15,16 @@ class Auth extends CI_Controller{
         if($this->form_validation->run()){
             $data = [
                 "user_name" => $_POST["user_name"],
-                "user_password" => $_POST["user_password"],
-                "user_status" => 1
+                "password" => $_POST["user_password"],
+                "admin_status" => 1
             ];
             $this->load->model("work");            
-            $val = $this->work->login("user", $data);
+            $val = $this->work->login("admin", $data);
             if($val->num_rows() > 0){
                 $info = $val->result();
                 foreach($info as $value){
-                    $this->session->set_userdata("id", $value->user_name);
-                    $this->session->set_userdata("display_name", $value->display_name);
+                    $this->session->set_userdata("id", $value->id);
+                    $this->session->set_userdata("display_name", $value->admin_name);
                     redirect(base_url("welcome"));
                 }
                 

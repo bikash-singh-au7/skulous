@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set("Asia/Kolkata");
 
 class BatchSetup extends CI_Controller {
     public function __construct() {
@@ -38,44 +39,50 @@ class BatchSetup extends CI_Controller {
     //Add Subject
     public function addBatch($action = null){
 		if($action == "add"){
-			$this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
-			$this->form_validation->set_rules("batch_name","Batch Name", "trim|required|is_unique[batch.batch_name]");
+			$this->form_validation->set_rules("batch_name","Batch Name", "trim|required|callback_is_bname_unique");
 			$this->form_validation->set_rules("batch_medium","Batch Medium", "trim|required");
-			$this->form_validation->set_rules("batch_seat","Batch Seat", "trim|required");
-			$this->form_validation->set_rules("batch_fee","Batch Fee", "trim|required");
-			$this->form_validation->set_rules("batch_start_date","Batch Starting Date", "trim|required");
-			$this->form_validation->set_rules("batch_start_time","Batch Starting Time", "trim|required");
-			$this->form_validation->set_rules("batch_end_time","Batch End Time", "trim|required");
+			$this->form_validation->set_rules("batch_seat","Batch Seat", "trim|required|is_natural_no_zero");
+			$this->form_validation->set_rules("batch_fee","Batch Fee", "trim|required|is_natural_no_zero");
+			$this->form_validation->set_rules("discount","Discount", "trim|is_natural");
+			$this->form_validation->set_rules("batch_start_date","Batch Starting Date", "trim|required|callback_valid_batch_date");
+			$this->form_validation->set_rules("batch_start_time","Batch Starting Time", "trim|required|callback_valid_start_time");
+			$this->form_validation->set_rules("batch_end_time","Batch End Time", "differs[batch_start_time]|trim|required|callback_valid_end_time");
 			$this->form_validation->set_rules("class_id","Class", "required");
 			$this->form_validation->set_rules("subject_id","Subject", "required");
 			$this->form_validation->set_rules("comment","Comment", "trim");
 			if($this->form_validation->run()){
 				$data = [
 					"session_id" => $this->session->userdata("session_id"),	
-					"batch_name" => $this->input->post("batch_name"),	
-					"batch_medium" => $this->input->post("batch_medium"),	
+					"batch_name" => strtoupper($this->input->post("batch_name")),	
+					"batch_medium" => strtoupper($this->input->post("batch_medium")),	
 					"batch_seat" => $this->input->post("batch_seat"),	
 					"available_seat" => $this->input->post("batch_seat"),	
 					"batch_fee" => $this->input->post("batch_fee"),	
+					"discount" => $this->input->post("discount"),	
 					"batch_start_date" => $this->input->post("batch_start_date"),	
 					"batch_start_time" => $this->input->post("batch_start_time"),	
 					"batch_end_time" => $this->input->post("batch_end_time"),	
 					"class_id" => $this->input->post("class_id"),	
 					"subject_id" => $this->input->post("subject_id"),	
-					"comment" => $this->input->post("comment")
+					"comment" => strtoupper($this->input->post("comment"))
 				];
 				if($this->work->insert_data("batch", $data)){
-					$response["alert"] = "<div class='alert alert-success rounded-0 border'>Batch successfully added !!</div>";
-					$response["status"] = 1;
-				}else{
-					$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Batch does't added !!</div>";
-					$response["status"] = 2;
+                    $response["alert"] = "Created !!";
+                    $response["message"] = "Batch successfully created.";
+                    $response["modal"] = "success";
+                    $response["status"] = 1;
+                }else{
+					$response["alert"] = "Oops error !!";
+                    $response["message"] = "Batch does't created.";
+                    $response["modal"] = "error";
+                    $response["status"] = 2;
 				}
 			}else{
 				$response["batch_name"] = strip_tags(form_error('batch_name'));
 				$response["batch_medium"] = strip_tags(form_error('batch_medium'));
 				$response["batch_seat"] = strip_tags(form_error('batch_seat'));
 				$response["batch_fee"] = strip_tags(form_error('batch_fee'));
+				$response["discount"] = strip_tags(form_error('discount'));
 				$response["batch_start_date"] = strip_tags(form_error('batch_start_date'));
 				$response["batch_start_time"] = strip_tags(form_error('batch_start_time'));
 				$response["batch_end_time"] = strip_tags(form_error('batch_end_time'));
@@ -86,14 +93,14 @@ class BatchSetup extends CI_Controller {
 			}
 			echo json_encode($response);
 		}elseif($action == "manage-add"){
-			$this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
-			$this->form_validation->set_rules("batch_name","Batch Name", "trim|required|is_unique[batch.batch_name]");
+			$this->form_validation->set_rules("batch_name","Batch Name", "trim|required|callback_is_bname_unique");
 			$this->form_validation->set_rules("batch_medium","Batch Medium", "trim|required");
-			$this->form_validation->set_rules("batch_seat","Batch Seat", "trim|required");
-			$this->form_validation->set_rules("batch_fee","Batch Fee", "trim|required");
-			$this->form_validation->set_rules("batch_start_date","Batch Starting Date", "trim|required");
-			$this->form_validation->set_rules("batch_start_time","Batch Starting Time", "trim|required");
-			$this->form_validation->set_rules("batch_end_time","Batch End Time", "trim|required");
+			$this->form_validation->set_rules("batch_seat","Batch Seat", "trim|required|is_natural_no_zero");
+			$this->form_validation->set_rules("batch_fee","Batch Fee", "trim|required|is_natural_no_zero");
+			$this->form_validation->set_rules("discount","Discount", "trim|is_natural");
+			$this->form_validation->set_rules("batch_start_date","Batch Starting Date", "trim|required|callback_valid_batch_date");
+			$this->form_validation->set_rules("batch_start_time","Batch Starting Time", "trim|required|callback_valid_start_time");
+			$this->form_validation->set_rules("batch_end_time","Batch End Time", "differs[batch_start_time]|trim|required|callback_valid_end_time");
 			$this->form_validation->set_rules("class_id","Class", "required");
 			$this->form_validation->set_rules("subject_id","Subject", "required");
 			$this->form_validation->set_rules("comment","Comment", "trim");
@@ -106,6 +113,7 @@ class BatchSetup extends CI_Controller {
 					"batch_seat" => $this->input->post("batch_seat"),	
 					"available_seat" => $this->input->post("batch_seat"),	
 					"batch_fee" => $this->input->post("batch_fee"),	
+					"discount" => $this->input->post("discount"),	
 					"batch_start_date" => $this->input->post("batch_start_date"),	
 					"batch_start_time" => $this->input->post("batch_start_time"),	
 					"batch_end_time" => $this->input->post("batch_end_time"),	
@@ -114,8 +122,10 @@ class BatchSetup extends CI_Controller {
 					"comment" => $this->input->post("comment")
 				];
 				if($this->work->insert_data("batch", $data)){
-					$response["alert"] = "<div class='alert alert-success rounded-0 border'>Batch successfully Added !!</div>";
-					$response["status"] = 1;
+					$response["alert"] = "Created !!";
+                    $response["message"] = "Batch successfully created.";
+                    $response["modal"] = "success";
+                    $response["status"] = 1;
 
 					$data["action"] = "manage-add";
 					$data["result"] = $this->work->select_data("batch", ["id"=>$this->work->get_last_id()]);
@@ -124,14 +134,17 @@ class BatchSetup extends CI_Controller {
 					$response["lastRow"] = $html;
 					//
 				}else{
-					$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Batch does't added !!</div>";
-					$response["status"] = 2;
+					$response["alert"] = "Oops error !!";
+                    $response["message"] = "Batch does't created.";
+                    $response["modal"] = "error";
+                    $response["status"] = 2;
 				}
 			}else{
 				$response["batch_name"] = strip_tags(form_error('batch_name'));
 				$response["batch_medium"] = strip_tags(form_error('batch_medium'));
 				$response["batch_seat"] = strip_tags(form_error('batch_seat'));
 				$response["batch_fee"] = strip_tags(form_error('batch_fee'));
+				$response["discount"] = strip_tags(form_error('discount'));
 				$response["batch_start_date"] = strip_tags(form_error('batch_start_date'));
 				$response["batch_start_time"] = strip_tags(form_error('batch_start_time'));
 				$response["batch_end_time"] = strip_tags(form_error('batch_end_time'));
@@ -144,18 +157,19 @@ class BatchSetup extends CI_Controller {
 		}
     }
     
-    //Update Subject
+    //Update Batch
 	public function updateBatch($row_id=null){
 		$this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
         $this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
-			$this->form_validation->set_rules("batch_name","Batch Name", "trim|required");
+			$this->form_validation->set_rules("batch_name","Batch Name", "trim|required|callback_is_bname_unique_update");
 			$this->form_validation->set_rules("batch_status","Batch Status", "trim|required");
 			$this->form_validation->set_rules("batch_medium","Batch Medium", "trim|required");
 			$this->form_validation->set_rules("batch_seat","Batch Seat", "trim|required");
 			$this->form_validation->set_rules("batch_fee","Batch Fee", "trim|required");
-			$this->form_validation->set_rules("batch_start_date","Batch Starting Date", "trim|required");
-			$this->form_validation->set_rules("batch_start_time","Batch Starting Time", "trim|required");
-			$this->form_validation->set_rules("batch_end_time","Batch End Time", "trim|required");
+			$this->form_validation->set_rules("discount","Discount", "trim|is_natural");
+			$this->form_validation->set_rules("batch_start_date","Batch Starting Date", "trim|required|callback_valid_batch_date");
+			$this->form_validation->set_rules("batch_start_time","Batch Starting Time", "trim|required|callback_valid_start_time_update");
+			$this->form_validation->set_rules("batch_end_time","Batch End Time", "trim|required|callback_valid_end_time");
 			$this->form_validation->set_rules("class_id","Class", "required");
 			$this->form_validation->set_rules("subject_id","Subject", "required");
 			$this->form_validation->set_rules("comment","Comment", "trim");
@@ -167,6 +181,7 @@ class BatchSetup extends CI_Controller {
                 "batch_medium" => $this->input->post("batch_medium"),	
                 "batch_seat" => $this->input->post("batch_seat"),	
                 "batch_fee" => $this->input->post("batch_fee"),	
+                "discount" => $this->input->post("discount"),	
                 "batch_start_date" => $this->input->post("batch_start_date"),	
                 "batch_start_time" => $this->input->post("batch_start_time"),	
                 "batch_end_time" => $this->input->post("batch_end_time"),	
@@ -175,7 +190,9 @@ class BatchSetup extends CI_Controller {
                 "comment" => $this->input->post("comment")
             ];
             if($this->work->update_data("batch", $data, ["id"=>$this->input->post("batch_id")])){
-                $response["alert"] = "<div class='alert alert-success rounded-0 border'>Batch successfully updated !!</div>";
+                $response["alert"] = "Updated !!";
+                $response["message"] = "Batch successfully updated.";
+                $response["modal"] = "success";
                 $response["status"] = 1;
 
                 $data["action"] = "update";
@@ -186,7 +203,9 @@ class BatchSetup extends CI_Controller {
                 $response["updatedRow"] = $html;
 
             }else{
-                $response["alert"] = "<div class='alert alert-danger rounded-0 border'>Batch does't updated !!</div>";
+                $response["alert"] = "Oops error !!";
+                $response["message"] = "Batch does't updated.";
+                $response["modal"] = "error";
                 $response["status"] = 2;
             }
         }else{
@@ -196,6 +215,7 @@ class BatchSetup extends CI_Controller {
             $response["batch_medium"] = strip_tags(form_error('batch_medium'));
             $response["batch_seat"] = strip_tags(form_error('batch_seat'));
             $response["batch_fee"] = strip_tags(form_error('batch_fee'));
+            $response["discount"] = strip_tags(form_error('discount'));
             $response["batch_start_date"] = strip_tags(form_error('batch_start_date'));
             $response["batch_start_time"] = strip_tags(form_error('batch_start_time'));
             $response["batch_end_time"] = strip_tags(form_error('batch_end_time'));
@@ -217,6 +237,7 @@ class BatchSetup extends CI_Controller {
 		$response["batch_name"] = $data["value"][0]->batch_name;
 		$response["batch_status"] = $data["value"][0]->batch_status;
 		$response["batch_fee"] = $data["value"][0]->batch_fee;
+		$response["discount"] = $data["value"][0]->discount;
 		$response["batch_medium"] = $data["value"][0]->batch_medium;
 		$response["batch_seat"] = $data["value"][0]->batch_seat;
 		$response["batch_start_date"] = $data["value"][0]->batch_start_date;
@@ -244,14 +265,111 @@ class BatchSetup extends CI_Controller {
 		$id = $this->input->post("batch_id");
 		if($this->work->delete_data("batch", ["id"=>$id])){
 			$response["rowId"] = "row-".$id;
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Batch deleted successfully !!</div>";
+            $response["alert"] = "Deleted !!";
+            $response["message"] = "Batch successfully deleted.";
+            $response["modal"] = "success";
 		}else{
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Batch does't deleted !!</div>";
+			$response["alert"] = "Oops error !!";
+            $response["message"] = "Batch does't deleted.";
+            $response["modal"] = "error";
 		}
 		echo json_encode($response);
 	}
 
-
+    // ============================
+    //Cutom Validation
+    //For adding the data
+    public function is_bname_unique($str){
+        if($str != ""){
+            $query = $this->work->select_data("batch", ["session_id"=>$this->session->userdata("session_id"), "batch_name"=>$str]);
+            if(!empty($query[0])){
+                $this->form_validation->set_message('is_bname_unique', 'This {field} is already exists');
+                return FALSE;
+            }else{
+                return TRUE;
+            }
+        }
+    }
+    
+    public function valid_batch_date($str){
+        if($str != ""){
+            $session_query = $this->work->select_data("session", ["id"=>$this->session->userdata("session_id")]);
+            $start_session = strtotime($session_query[0]->start_session);
+            $end_session = strtotime($session_query[0]->end_session);
+            
+            $form_date = strtotime($str);
+            if($form_date <= $end_session and $form_date >= $start_session){
+                return TRUE;
+            }else{
+                $this->form_validation->set_message('valid_batch_date', 'The Batch date is not valid');
+                return FALSE;
+            }
+        }
+    }
+    
+    
+    public function valid_start_time($str){
+        if($str != ""){
+            $query = $this->work->select_data("batch", ["session_id"=>$this->session->userdata("session_id"), "batch_start_time"=>$str, "batch_medium"=>$this->input->post("batch_medium"), "class_id"=>$this->input->post("class_id"), "subject_id"=>$this->input->post("subject_id")]);
+            if(!empty($query[0])){
+                $this->form_validation->set_message('valid_start_time', 'This {field} is already exists');
+                return FALSE;
+            }else{
+                return TRUE;
+            }
+        }
+    }
+    
+     
+    public function valid_end_time($str){
+        if($str != ""){
+            $batch_start_time = strtotime($this->input->post("batch_start_time"));
+            $end_time_hour = date("h", strtotime($str))+date("h:m", strtotime("00:45"));
+            $end_time_minut = date("m", strtotime($str));
+            
+            $after_one_hour = strtotime(date("h:m", strtotime($end_time_hour.":".$end_time_minut)));
+            if(strtotime($str) <= $batch_start_time){
+                $this->form_validation->set_message('valid_end_time', 'This {field} is greater Batch start time');
+                return FALSE;
+            }elseif(strtotime($str) > $after_one_hour){
+                $this->form_validation->set_message('valid_end_time', 'This {field} must greater than start time + One Hour');
+                return FALSE;
+            }else{
+                return TRUE;
+            }
+            
+        }
+    }
+    
+    
+ 
+    //For update data
+    public function is_bname_unique_update($str){
+        if($str != ""){
+            $query = $this->work->select_data("batch", ["session_id"=>$this->session->userdata("session_id"), "batch_name"=>$str, "id !="=>$this->input->post("batch_id")]);
+            if(!empty($query[0])){
+                $this->form_validation->set_message('is_bname_unique_update', 'This {field} is already exists');
+                return FALSE;
+            }else{
+                return TRUE;
+            }
+        }
+    }
+    
+    public function valid_start_time_update($str){
+        if($str != ""){
+            $query = $this->work->select_data("batch", ["session_id"=>$this->session->userdata("session_id"), "batch_start_time"=>$str, "batch_medium"=>$this->input->post("batch_medium"), "class_id"=>$this->input->post("class_id"), "subject_id"=>$this->input->post("subject_id"), "id !="=>$this->input->post("batch_id")]);
+            if(!empty($query[0])){
+                $this->form_validation->set_message('valid_start_time_update', 'This {field} is already exists');
+                return FALSE;
+            }else{
+                return TRUE;
+            }
+        }
+    }
+    
+    
+    
 }
 
 

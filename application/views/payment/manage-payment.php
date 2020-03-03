@@ -17,7 +17,7 @@
                                 <span class="text-muted font-weight-bold"> <i class="fa fa-cog"></i> Manage Payment</span>
                             </div>
                             <div class="float-right px-2">
-                                <button class="btn btn-info px-2 my-1" type="button" data-toggle="modal" data-target="#addModal" id="addBtn"> <i class="fa fa-plus"></i> New Payment</button>
+                                <a href="<?= base_url('paymentsetup/payment/add')?>" class="btn btn-info"> <i class="fa fa-plus"></i> New Payment  </a>
                             </div>
                         </div>
                     </div>

@@ -73,7 +73,7 @@
                         $("#session_name").html(response["session_name"]);
                         $("#start_session").html(response["start_session"]);
                         $("#end_session").html(response["end_session"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#session_name").html("");
                         $("#start_session").html("");
@@ -82,10 +82,11 @@
                         //set blank value after inserting the value
                         $(".form-control").val("");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
-                    }else{
-                        $(".form-control").val("");
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                     }
                 }
             });

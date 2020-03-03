@@ -331,7 +331,7 @@
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="font-weight-bold">Discount </label>
-                                            <input type="text" name="discount" placeholder="Discount Amount" class="form-control pl-2" id="discount" readonly> 
+                                            <input type="text" name="discount" placeholder="Discount Amount" class="form-control pl-2" id="discount"> 
                                             <span class="text-danger" id="e_discount"></span>
                                         </div> 
                                     </div> 
@@ -501,7 +501,7 @@
         };
     var select = ""
         
-        $("#state").change(function(){
+    $("#state").change(function(){
             var val = $(this).val();
             var length = 0;
             if(val == ""){
@@ -517,7 +517,7 @@
         })
     
     //fill batch fee
-        $("#batch_id").on("change", function(){
+    $("#batch_id").on("change", function(){
             var batchId = $(this).val()
             if (batchId == ""){
                 $("#fee_amount").val("");

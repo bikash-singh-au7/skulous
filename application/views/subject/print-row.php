@@ -7,6 +7,7 @@ if($action == "manage-add"){
             <tr id="row-<?=$value->id?>">
             <td><?=$value->id?></td>
             <td><?=$value->subject_name?></td>
+            <td><?=$value->subject_code?></td>
             <td class="text-center">
                 <?php
                     if($value->subject_status == 1){
@@ -36,6 +37,7 @@ if($action == "update"){
         ?>         
             <td><?=$value->id?></td>
             <td><?=$value->subject_name?></td>
+            <td><?=$value->subject_code?></td>
             <td class="text-center">
                 <?php
                     if($value->subject_status == 1){

@@ -15,9 +15,12 @@
                         </div>
                         <div class="col-md-12 p-0 m-0 border">
                             <div class="float-left px-2 py-2">
-                                <span class="text-muted font-weight-bold">Manage Session</span>
+                                <span class="text-muted font-weight-bold"> <i class="fa fa-cog"></i> Manage Session</span>
                             </div>
                             <div class="float-right px-2">
+                                <a href="<?= base_url('sessionsetup/session/select')?>" class="btn btn-info">
+                                    <i class="fa fa-eye"></i> Select Session
+                                </a>
                                 <button class="btn btn-info px-2 my-1" type="button" data-toggle="modal" data-target="#addSession" id="addBtn"> <i class="fa fa-plus"></i>Add Session </button>
                             </div>
                         </div>
@@ -191,9 +194,6 @@
     function deleteData(id){
         $("#deleteModal").modal("show");
         $("#delete_session_id").val(id);
-
-        $("#alert").html("");
-        
     }
     
     $(document).ready(function(){
@@ -207,7 +207,14 @@
                 success: function(response){
                     $("#"+response["rowId"]).remove();
                     $("#deleteModal").modal("hide");
-                    $("#alert").html(response["alert"]);
+                    Swal.fire(
+                      response["alert"],
+                      response["message"],
+                      response["modal"]
+                    );
+                    if(response["redirect"] != ""){
+                        window.location = response["redirect"];
+                    }
                 }
             });
         })
@@ -248,7 +255,7 @@
                         $("#e_add_session_name").html(response["session_name"]);
                         $("#e_add_start_session").html(response["start_session"]);
                         $("#e_add_end_session").html(response["end_session"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_add_session_name").html("");
                         $("#e_add_start_session").html("");
@@ -261,17 +268,14 @@
                         //hide modal
                         $("#addSession").modal("hide");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        )
                         //add new row
                         $("#dataTable").append(response["lastRow"]);
 
-                    }else{
-                        $("#addSession").modal("hide");
-                        //set blank value after inserting the value
-                        $("#add_session_name").val("");
-                        $("#add_start_session").val("<?= $startSession?>");
-                        $("#add_end_session").val("<?= $endSession?>");
-                        $("#alert").html(response["alert"]);
                     }
                 }
             });
@@ -293,7 +297,7 @@
                         $("#e_update_session_name").html(response["session_name"]);
                         $("#e_update_start_session").html(response["start_session"]);
                         $("#e_update_end_session").html(response["end_session"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_update_session_name").html("");
                         $("#e_update_start_session").html("");
@@ -302,15 +306,13 @@
                         
                         //set message for alert box
                         $("#updateModal").modal("hide");
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                         $("#"+response["rowId"]).html(response["updatedRow"]);
 
-                    }else{
-                        $("#updateModal").modal("hide");
-                        $("#update_session_name").val("");
-                        $("#update_start_session").val("");
-                        $("#update_end_session").val("");
-                        $("#alert").html(response["alert"]);
                     }
                 }
             });

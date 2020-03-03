@@ -25,6 +25,7 @@
                                     <tr>
                                         <th>#Id</th>
                                         <th>Subject Name</th>
+                                        <th>Subject Code</th>
                                         <th>Status</th>
                                         <th>Comments</th>
                                         <th class="text-center">DOC</th>
@@ -39,6 +40,7 @@
                                             <tr id="row-<?=$value->id?>">
                                                 <td><?=$value->id?></td>
                                                 <td><?=$value->subject_name?></td>
+                                                <td><?=$value->subject_code?></td>
                                                 <td class="text-center">
                                                     <?php
                                                         if($value->subject_status == 1){
@@ -109,8 +111,14 @@
                         <div class="form-group">
                             <label for="">Subject name <span class="text-danger">*</span></label>
                             <input type="text" name="subject_name" class="form-control" value="" placeholder="Enter subject name" id="update_subject_name">
-                            <span class="text-danger" id="e_update_class_name"></span>
+                            <span class="text-danger" id="e_update_subject_name"></span>
                             <input type="hidden" name="subject_id" class="form-control" value="" id="update_subject_id">
+                        </div>
+                                                                   
+                        <div class="form-group">
+                            <label for="">Subject Code <span class="text-danger">*</span></label>
+                            <input type="text" name="subject_code" class="form-control" value="" placeholder="Enter subject Code PHY/CHE" id="update_subject_code">
+                            <span class="text-danger" id="e_update_subject_code"></span>
                         </div>
                                                                     
                         <div class="form-group">
@@ -152,8 +160,13 @@
                     <form action="" method="post" id="addForm">
                         <div class="form-group">
                             <label for="">Subject name <span class="text-danger">*</span></label>
-                            <input type="text" name="subject_name" class="form-control" value="" placeholder="Enter subject like PHY/CHE" id="add_subject_name">
+                            <input type="text" name="subject_name" class="form-control" value="" placeholder="Enter subject like PHYSICS/CHEMISTRY" id="add_subject_name">
                             <span class="text-danger" id="e_add_subject_name"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="">Subject Code <span class="text-danger">*</span></label>
+                            <input type="text" name="subject_code" class="form-control" value="" placeholder="Enter subject Code PHY/CHE" id="add_subject_code">
+                            <span class="text-danger" id="e_add_subject_code"></span>
                         </div>
                             
                         <div class="form-group">
@@ -208,6 +221,7 @@
         $("#updateModal").modal("show");
         $("#alert").html("");
         $("#e_update_subject_name").html("");
+        $("#e_update_subject_code").html("");
         $("#e_update_comment").html("");
         $.ajax({
                 url: '<?= base_url("subjectsetup/getData")?>',
@@ -217,6 +231,7 @@
                 success: function(response){
                     $("#update_subject_id").val(response["subject_id"]);
                     $("#update_subject_name").val(response["subject_name"]);
+                    $("#update_subject_code").val(response["subject_code"]);
                     $("#update_comment").val(response["comment"]);
                     $(".update_subject_status option[value="+response["subject_status"]+"]").attr('selected', 'selected');
                 }
@@ -236,29 +251,30 @@
                     if(response["status"] == 0){
                         //set error message 
                         $("#e_add_subject_name").html(response["subject_name"]);
+                        $("#e_add_subject_code").html(response["subject_code"]);
                         $("#e_add_comment").html(response["coment"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_add_subject_name").html("");
+                        $("#e_add_subject_code").html("");
                         $("#e_add_comment").html("");
 
                         //set blank value after inserting the value
                         $("#add_subject_name").val("");
+                        $("#add_subject_code").val("");
                         $("#add_comment").val("");
                         
                         //hide modal
                         $("#addModal").modal("hide");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                         //add new row
                         $("#dataTable").append(response["lastRow"]);
 
-                    }else{
-                        $("#addModal").modal("hide");
-                        //set blank value after inserting the value
-                        $("#add_subject_name").val("");
-                        $("#add_comment").val("");
-                        $("#alert").html(response["alert"]);
                     }
                 }
             });
@@ -270,7 +286,7 @@
         $("body").on("submit", "#updateForm", function(e){
             e.preventDefault();
             $.ajax({
-                url: '<?= base_url("subjectsetup/updateClass")?>',
+                url: '<?= base_url("subjectsetup/updateSubject")?>',
                 type: 'POST',
                 data: $(this).serialize(),
                 dataType: 'json',
@@ -278,24 +294,27 @@
                     if(response["status"] == 0){
                         //set error message 
                         $("#e_update_subject_name").html(response["subject_name"]);
+                        $("#e_update_subject_code").html(response["subject_code"]);
                         $("#e_update_subject_status").html(response["subject_status"]);
                         $("#e_update_comment").html(response["comment"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_update_subject_name").html("");
+                        $("#e_update_subject_code").html("");
                         $("#e_update_subject_status").html("");
                         $("#e_update_comment").html("");
                         
                         //set message for alert box
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
+                        
                         $("#updateModal").modal("hide");
                         $("#alert").html(response["alert"]);
                         $("#"+response["rowId"]).html(response["updatedRow"]);
 
-                    }else{
-                        $("#updateModal").modal("hide");
-                        $("#update_subject_name").val("");
-                        $("#update_comment").val("");
-                        $("#alert").html(response["alert"]);
                     }
                 }
             });

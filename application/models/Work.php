@@ -55,6 +55,13 @@ class Work extends CI_Model{
         $this->db->select_sum($col);
         $query = $this->db->get($table);
         return $query->result();
+    }   
+    //Select Max
+    public function select_max($table, $cond=null, $col=null){
+        $this->db->where($cond);
+        $this->db->select_max($col);
+        $query = $this->db->get($table);
+        return $query->result();
     }
     
     

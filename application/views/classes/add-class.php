@@ -62,7 +62,7 @@
                         //set error message 
                         $("#e_class_name").html(response["class_name"]);
                         $("#e_comment").html(response["comment"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_class_name").html("");
                         $("#e_comment").html("");
@@ -70,10 +70,11 @@
                         //set blank value after inserting the value
                         $(".form-control").val("");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
-                    }else{
-                        $(".form-control").val("");
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                     }
                 }
             });

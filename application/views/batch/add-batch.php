@@ -8,7 +8,7 @@
                         <div class="col-md-12 p-0 m-0" id="alert">
                             
                         </div>
-                        <div class="col-md-12 p-0 m-0 border">
+                        <div class="col-md-12 p-0 m-0 border bg-white">
                             <div class="float-left px-2 py-2">
                                 <span class="text-muted font-weight-bold"> <i class="fa fa-plus"></i> Add Batch </span>
                             </div>
@@ -50,6 +50,12 @@
                             </div>
                             
                             <div class="form-group">
+                                <label for="">Discount Amount </label>
+                                <input type="number" name="discount" value="" class="form-control" placeholder="Enter Discount amount">
+                                <span class="text-danger" id="e_discount"></span>
+                            </div>
+                            
+                            <div class="form-group">
                                 <label for="">Batch Starting Date <span class="text-danger">*</span></label>
                                 <input type="date" name="batch_start_date" class="form-control" value="">
                                 <span class="text-danger" id="e_batch_start_date"></span>
@@ -57,13 +63,13 @@
 
                             <div class="form-group">
                                 <label for="">Batch Time From <span class="text-danger">*</span></label>
-                                <input type="time" name="batch_start_time" class="form-control" value="">
+                                <input type="time" name="batch_start_time" class="form-control" value="" min="04:00" max="22:00">
                                 <span class="text-danger" id="e_batch_start_time"></span>
                             </div>
 
                             <div class="form-group">
                                 <label for="">Batch Time End <span class="text-danger">*</span></label>
-                                <input type="time" name="batch_end_time" class="form-control" value="">
+                                <input type="time" name="batch_end_time" class="form-control" value="" min="04:00" max="22:00">
                                 <span class="text-danger" id="e_batch_end_time"></span>
                             </div>
 
@@ -136,18 +142,20 @@
                         $("#e_batch_medium").html(response["batch_medium"]);
                         $("#e_batch_seat").html(response["batch_seat"]);
                         $("#e_batch_fee").html(response["batch_fee"]);
+                        $("#e_discount").html(response["discount"]);
                         $("#e_batch_start_date").html(response["batch_start_date"]);
                         $("#e_batch_start_time").html(response["batch_start_time"]);
                         $("#e_batch_end_time").html(response["batch_end_time"]);
                         $("#e_class_id").html(response["class_id"]);
                         $("#e_subject_id").html(response["subject_id"]);
                         $("#e_comment").html(response["comment"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_batch_name").html("");
                         $("#e_batch_medium").html("");
                         $("#e_batch_seat").html("");
                         $("#e_batch_fee").html("");
+                        $("#e_discount").html("");
                         $("#e_batch_start_date").html("");
                         $("#e_batch_start_time").html("");
                         $("#e_batch_end_time").html("");
@@ -158,10 +166,11 @@
                         //set blank value after inserting the value
                         $(".form-control").val("");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
-                    }else{
-                        $(".form-control").val("");
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                     }
                 }
             });

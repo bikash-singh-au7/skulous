@@ -209,17 +209,12 @@
                                                 ?>
                                             </select>
                                             <span class="text-danger" id="e_batch_id"></span>
+                                            <span class="text-info font-weight-bold" id="available_seat"></span>
+                                            
                                         </div>
                                     </div>
                                    
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="font-weight-bold">Payble Amount </label>
-                                            <input type="hidden" name="fee_amount" placeholder="Total Fee Amount" class="form-control pl-2" readonly id="fee_amount"> 
-                                            <input type="text" id="payble_amount" name="payble_amount" class="form-control" readonly>
-                                            <span class="text-danger" id="e_payble_amount"></span>
-                                        </div> 
-                                    </div> 
+                                    
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="font-weight-bold">Discount </label>
@@ -227,7 +222,7 @@
                                             <span class="text-danger" id="e_discount"></span>
                                         </div> 
                                     </div> 
-                                   
+                                    
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="font-weight-bold">Remarks </label>
@@ -251,8 +246,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Total Payable Amount</label>
-                                                <input type="number" value="" name="amount" class="form-control pl-2" placeholder="Total Payable Amount" readonly> 
-                                                <span class="text-danger" id="e_amount"></span>
+                                                <input type="number" value="" name="payble_amount" class="form-control pl-2" placeholder="Total Payable Amount" readonly id="payble_amount"> 
                                             </div> 
                                         </div>
                                         
@@ -267,7 +261,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label class="font-weight-bold">Payment Date</label>
-                                                <input type="date" value="<?= $today?>" name="payment_date" class="form-control pl-2"> 
+                                                <input type="date" value="<?= $today?>" name="payment_date" class="form-control pl-2" id="payment_date"> 
                                                 <span class="text-danger" id="e_payment_date"></span>
                                             </div> 
                                         </div> 
@@ -350,7 +344,6 @@
                         $("#e_school").html(response["school"]);
                         $("#e_board").html(response["board"]);
                         $("#e_batch_id").html(response["batch_id"]);
-                        $("#e_payble_amount").html(response["payble_amount"]);
                         $("#e_discount").html(response["discount"]);
                         $("#e_comment").html(response["comment"]);
                         //Payment Detaile
@@ -358,7 +351,7 @@
                         $("#e_payment_date").html(response["payment_date"]);
                         
                         
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_student_name").html("");
                         $("#e_gender").html("");
@@ -379,7 +372,7 @@
                         $("#e_school").html("");
                         $("#e_board").html("");
                         $("#e_batch_id").html("");
-                        $("#e_payble_amount").html("");
+                        $("#available_seat").html("");
                         $("#e_discount").html("");
                         $("#e_comment").html("");
                         //Payment Detaile
@@ -389,12 +382,15 @@
 
                         //set blank value after inserting the value
                         $(".form-control").val("");
+                        
+                        $("#payment_date").val("<?= $today?>");
+                        
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
-                        $("#payment_alert").html(response["payment_alert"]);
-                    }else{
-                        $(".form-control").val("");
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                     }
                 }
             });
@@ -405,12 +401,12 @@
         });
         
         
-        
         //fill batch fee
         $("#batch_id").on("change", function(){
             var batchId = $(this).val()
             if (batchId == ""){
-                $("#fee_amount").val("");
+                //$("#fee_amount").val("");
+                $("#available_seat").html("");
                 $("#discount").attr("readonly", "readonly");
                 $("#payble_amount").val("");
             }else{
@@ -420,8 +416,19 @@
                     type:"POST",
                     dataType:"json",
                     success:function(response){
-                        $("#fee_amount").val(response["fee"]);
-                        $("#payble_amount").val(response["fee"]);
+                        //available_seat
+                        if(response["available_seat"] == 0){
+                            $("#available_seat").html("<span class='text-danger'>Batch Full (Select another batch)</span>");
+                        }else{
+                            $("#available_seat").html("Available Seat:- "+response["available_seat"]);
+                        }
+                        
+                        
+                        paybleAmount = parseInt(response["fee"])-(parseInt(response["discount"]));
+                        $("#payble_amount").val(paybleAmount);
+                        $("#p_amount").val(paybleAmount);
+                        
+                        //$("#fee_amount").val(response["fee"]);
                         $("#discount").removeAttr("readonly");
                     }
                 });
@@ -429,7 +436,37 @@
             
         });
         
-        
+        //for payble amount
+        $("#discount").keyup(function(){
+            var selectedBatchId = $("#batch_id").val();
+            var discountAmount = $(this).val();
+            $.ajax({
+                url:"<?= base_url('regsetup/batchFee')?>",
+                data:{batch_id:selectedBatchId},
+                type:"POST",
+                dataType:"json",
+                success:function(response){
+                    var paybleAmount = 0;
+                    //before descount
+                    paybleAmount = parseInt(response["fee"])-parseInt(response["discount"]);
+                    if(discountAmount == ""){
+                        paybleAmount = parseInt(response["fee"])-parseInt(response["discount"]);
+                        $("#e_discount").html("");
+                    }else if(discountAmount >= paybleAmount){
+                        $("#e_discount").html("Discount Must be less than Batch amount");
+                    }else if(discountAmount < 0){
+                        $("#e_discount").html("Discount Must be greater than 0");
+                    }else{
+                        paybleAmount = parseInt(response["fee"])-(parseInt(response["discount"])+parseInt(discountAmount));
+                        $("#e_discount").html("");
+                    }
+                    
+                    $("#payble_amount").val(paybleAmount);
+                }
+            });
+            
+        });
+            
         
     });
     

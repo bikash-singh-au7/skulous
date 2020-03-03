@@ -132,6 +132,8 @@
                                <input type="hidden" name="batch_id" class="form-control" value="" id="update_batch_id">
                                <span class="text-danger" id="e_update_batch_name"></span>
                             </div>
+                            
+                            
                             <div class="col-md-6 form-group">
                                <label for="">Status <span class="text-danger">*</span></label>
                                <select name="batch_status" id="update_batch_status" class="form-control">
@@ -162,6 +164,14 @@
                                 <input type="number" name="batch_fee" value="" class="form-control" placeholder="Enter fee for this batch" id="update_batch_fee">
                                 <span class="text-danger" id="e_update_batch_fee"></span>
                             </div>
+                            
+                            
+                            <div class="col-md-6 form-group">
+                                <label for="">Discount</label>
+                                <input type="number" name="discount" value="" class="form-control" placeholder="Enter fee for this batch" id="update_discount">
+                                <span class="text-danger" id="e_update_discount"></span>
+                            </div>
+                            
                             <div class="col-md-6 form-group">
                                 <label for="">Batch Starting Date <span class="text-danger">*</span></label>
                                 <input type="date" name="batch_start_date" class="form-control" value="" id="update_batch_start_date">
@@ -267,6 +277,12 @@
                             <span class="text-danger" id="e_add_batch_fee"></span>
                         </div>
 
+                        <div class="form-group">
+                            <label for="">Discount Amount </label>
+                            <input type="number" name="discount" value="" class="form-control" placeholder="Enter Discount amount" id="add_discount">
+                            <span class="text-danger" id="e_add_discount"></span>
+                        </div>
+                        
                         <div class="form-group">
                             <label for="">Batch Starting Date <span class="text-danger">*</span></label>
                             <input type="date" name="batch_start_date" class="form-control" value="" id="add_batch_start_date">
@@ -408,7 +424,11 @@
                 success: function(response){
                     $("#"+response["rowId"]).remove();
                     $("#deleteModal").modal("hide");
-                    $("#alert").html(response["alert"]);
+                    Swal.fire(
+                      response["alert"],
+                      response["message"],
+                      response["modal"]
+                    );
                 }
             });
         })
@@ -422,6 +442,7 @@
         $("#e_update_batch_status").html("");
         $("#e_update_batch_medium").html("");
         $("#e_update_batch_fee").html("");
+        $("#e_update_discount").html("");
         $("#e_update_batch_seat").html("");
         $("#e_update_batch_start_date").html("");
         $("#e_update_batch_start_time").html("");
@@ -448,6 +469,7 @@
                     $("#update_batch_medium option[value="+response["batch_medium"]+"]").attr('selected', 'selected');
                     $("#update_batch_seat").val(response["batch_seat"]);
                     $("#update_batch_fee").val(response["batch_fee"]);
+                    $("#update_discount").val(response["discount"]);
                     $("#update_batch_start_date").val(response["batch_start_date"]);
                     $("#update_batch_start_time").val(response["batch_start_time"]);
                     $("#update_batch_end_time").val(response["batch_end_time"]);
@@ -474,18 +496,20 @@
                         $("#e_add_batch_medium").html(response["batch_medium"]);
                         $("#e_add_batch_seat").html(response["batch_seat"]);
                         $("#e_add_batch_fee").html(response["batch_fee"]);
+                        $("#e_add_discount").html(response["discount"]);
                         $("#e_add_batch_start_date").html(response["batch_start_date"]);
                         $("#e_add_batch_start_time").html(response["batch_start_time"]);
                         $("#e_add_batch_end_time").html(response["batch_end_time"]);
                         $("#e_add_class_id").html(response["class_id"]);
                         $("#e_add_subject_id").html(response["subject_id"]);
                         $("#e_add_comment").html(response["comment"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_add_batch_name").html("");
                         $("#e_add_batch_medium").html("");
                         $("#e_add_batch_seat").html("");
                         $("#e_add_batch_fee").html("");
+                        $("#e_add_discount").html("");
                         $("#e_add_batch_start_date").html("");
                         $("#e_add_batch_start_time").html("");
                         $("#e_add_batch_end_time").html("");
@@ -508,24 +532,14 @@
                         //hide modal
                         $("#addModal").modal("hide");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                         //add new row
                         $("#dataTable").append(response["lastRow"]);
 
-                    }else{
-                        $("#addModal").modal("hide");
-                        //set blank value when some error occured
-                        $("#add_batch_name").val("");
-                        $("#add_batch_medium").val("");
-                        $("#add_batch_seat").val("");
-                        $("#add_batch_fee").val("");
-                        $("#add_batch_start_date").val("");
-                        $("#add_batch_start_time").val("");
-                        $("#add_batch_end_time").val("");
-                        $("#add_class_id").val("");
-                        $("#add_subject_id").val("");
-                        $("#add_comment").val("");
-                        $("#alert").html(response["alert"]);
                     }
                 }
             });
@@ -548,19 +562,21 @@
                         $("#e_update_batch_medium").html(response["batch_medium"]);
                         $("#e_update_batch_seat").html(response["batch_seat"]);
                         $("#e_update_batch_fee").html(response["batch_fee"]);
+                        $("#e_update_discount").html(response["discount"]);
                         $("#e_update_batch_start_date").html(response["batch_start_date"]);
                         $("#e_update_batch_start_time").html(response["batch_start_time"]);
                         $("#e_update_batch_end_time").html(response["batch_end_time"]);
                         $("#e_update_subject_id").html(response["subject_id"]);
                         $("#e_update_class_id").html(response["class_id"]);
                         
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_update_batch_name").html("");
                         $("#e_update_batch_status").html("");
                         $("#e_update_batch_medium").html("");
                         $("#e_update_batch_seat").html("");
                         $("#e_update_batch_fee").html("");
+                        $("#e_update_discount").html("");
                         $("#e_update_batch_start_date").html("");
                         $("#e_update_batch_start_time").html("");
                         $("#e_update_batch_end_time").html("");
@@ -574,24 +590,14 @@
                         $("#update_subject_id option").removeAttr("selected");
                         $("#update_class_id option").removeAttr("selected");
                         //set message for alert box
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        )
                         $("#updateModal").modal("hide");
-                        $("#alert").html(response["alert"]);
                         $("#"+response["rowId"]).html(response["updatedRow"]);
 
-                    }else{
-                        $("#updateModal").modal("hide");
-                        $("#update_batch_name").val("");
-                        $("#update_batch_status option").removeAttr("selected")
-                        $("#update_batch_medium option").removeAttr("selected");
-                        $("#update_batch_seat").val("");
-                        $("#update_batch_fee").val("");
-                        $("#update_batch_start_date").val("");
-                        $("#update_batch_start_time").val("");
-                        $("#update_batch_end_time").val("");
-                        $("#update_subject_id option").removeAttr("selected");
-                        $("#update_class_id option").removeAttr("selected");
-                        $("#update_comment").val("");
-                        $("#alert").html(response["alert"]);
                     }
                 }
             });

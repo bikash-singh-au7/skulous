@@ -41,20 +41,24 @@ class ClassSetup extends CI_Controller {
     public function addClass($action = null){
 		if($action == "add"){
 			$this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
-			$this->form_validation->set_rules("class_name","Class Name", "trim|required|is_unique[classes.class_name]");
+			$this->form_validation->set_rules("class_name","Class Name", "trim|required|callback_is_unique");
             $this->form_validation->set_rules("comment","Comment", "trim");
             
 			if($this->form_validation->run()){
 				$data = [
 					"session_id" => $this->session->userdata("session_id"),	
 					"class_name" => $this->input->post("class_name"),	
-					"comment" => $this->input->post("comment")
+					"comment" => strtoupper($this->input->post("comment"))
 				];
 				if($this->work->insert_data("classes", $data)){
-					$response["alert"] = "<div class='alert alert-success rounded-0 border'>Class successfully created !!</div>";
+					$response["alert"] = "Added !!";
+					$response["message"] = "Class successfully created.";
+					$response["modal"] = "success";
 					$response["status"] = 1;
 				}else{
-					$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Class does't created !!</div>";
+                    $response["alert"] = "Oops error !!";
+					$response["message"] = "Class does't created.";
+					$response["modal"] = "error";
 					$response["status"] = 2;
 				}
 			}else{
@@ -65,17 +69,19 @@ class ClassSetup extends CI_Controller {
 			echo json_encode($response);
 		}elseif($action == "manage-add"){
 			$this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
-			$this->form_validation->set_rules("class_name","Class Name", "trim|required|is_unique[classes.class_name]");
+			$this->form_validation->set_rules("class_name","Class Name", "trim|required|callback_is_unique");
             $this->form_validation->set_rules("comment","Comment", "trim");
             
 			if($this->form_validation->run()){
 				$data = [
 					"session_id" => $this->session->userdata("session_id"),	
 					"class_name" => $this->input->post("class_name"),	
-					"comment" => $this->input->post("comment")
+					"comment" => strtoupper($this->input->post("comment"))
 				];
 				if($this->work->insert_data("classes", $data)){
-					$response["alert"] = "<div class='alert alert-success rounded-0 border'>Class successfully Added !!</div>";
+					$response["alert"] = "Added !!";
+					$response["message"] = "Class successfully created.";
+					$response["modal"] = "success";
 					$response["status"] = 1;
 
 					$data["action"] = "manage-add";
@@ -85,7 +91,9 @@ class ClassSetup extends CI_Controller {
 					$response["lastRow"] = $html;
 					//
 				}else{
-					$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Class does't created !!</div>";
+					$response["alert"] = "Oops error !!";
+					$response["message"] = "Class does't created.";
+					$response["modal"] = "error";
 					$response["status"] = 2;
 				}
 			}else{
@@ -100,7 +108,7 @@ class ClassSetup extends CI_Controller {
     //Update Session
 	public function updateClass($row_id=null){
 		$this->form_validation->set_error_delimiters("<span class='text-danger'>","</span>");
-			$this->form_validation->set_rules("class_name","Class Name", "trim|required");
+			$this->form_validation->set_rules("class_name","Class Name", "trim|required|callback_is_unique_update");
 			$this->form_validation->set_rules("class_status","Status", "required");
 			$this->form_validation->set_rules("class_id","Class Id", "required");
             $this->form_validation->set_rules("comment","Comment", "trim");
@@ -109,10 +117,12 @@ class ClassSetup extends CI_Controller {
 				$data = [
 					"class_name" => $this->input->post("class_name"),	
 					"class_status" => $this->input->post("class_status"),	
-					"comment" => $this->input->post("comment")
+					"comment" => strtoupper($this->input->post("comment"))
 				];
 			if($this->work->update_data("classes", $data, ["id"=>$this->input->post("class_id")])){
-				$response["alert"] = "<div class='alert alert-success rounded-0 border'>Class successfully updated !!</div>";
+                $response["alert"] = "Updated !!";
+                $response["message"] = "Class successfully updated.";
+                $response["modal"] = "success";
 				$response["status"] = 1;
 				
 				$data["action"] = "update";
@@ -123,7 +133,9 @@ class ClassSetup extends CI_Controller {
 				$response["updatedRow"] = $html;
 				
 			}else{
-				$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Class does't updated !!</div>";
+				$response["alert"] = "Oops error !!";
+                $response["message"] = "Class does't updated.";
+                $response["modal"] = "error";
 				$response["status"] = 2;
 			}
 		}else{
@@ -153,13 +165,44 @@ class ClassSetup extends CI_Controller {
 		$id = $this->input->post("class_id");
 		if($this->work->delete_data("classes", ["id"=>$id])){
 			$response["rowId"] = "row-".$id;
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Class deleted successfully !!</div>";
+			$response["alert"] = "Deleted !!";
+            $response["message"] = "Class successfully deleted.";
+            $response["modal"] = "success";
 		}else{
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Class does't deleted !!</div>";
+			$response["alert"] = "Oops error !!";
+            $response["message"] = "Class does't deleted.";
+            $response["modal"] = "error";
 		}
 		echo json_encode($response);
 	}
-
+    
+    // ============================
+    //Cutom Validation
+    public function is_unique($str){
+        if($str != ""){
+            $query = $this->work->select_data("classes", ["session_id"=>$this->session->userdata("session_id"), "class_name"=>$str]);
+            if(!empty($query[0])){
+                $this->form_validation->set_message('is_unique', 'This class name is already exists');
+                return FALSE;
+            }else{
+                return TRUE;
+            }
+        }
+    }
+    
+    
+    //For update data
+    public function is_unique_update($str){
+        if($str != ""){
+            $query = $this->work->select_data("classes", ["session_id"=>$this->session->userdata("session_id"), "class_name"=>$str, "id !="=> $this->input->post("class_id")]);
+            if(!empty($query[0])){
+                $this->form_validation->set_message('is_unique_update', 'This class name is already exists');
+                return FALSE;
+            }else{
+                return TRUE;
+            }
+        }
+    }
 
 }
 

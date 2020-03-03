@@ -197,7 +197,11 @@
                 success: function(response){
                     $("#"+response["rowId"]).remove();
                     $("#deleteModal").modal("hide");
-                    $("#alert").html(response["alert"]);
+                    Swal.fire(
+                      response["alert"],
+                      response["message"],
+                      response["modal"]
+                    );
                 }
             });
         })
@@ -237,7 +241,7 @@
                         //set error message 
                         $("#e_add_class_name").html(response["class_name"]);
                         $("#e_add_comment").html(response["coment"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_add_class_name").html("");
                         $("#e_add_comment").html("");
@@ -249,16 +253,14 @@
                         //hide modal
                         $("#addModal").modal("hide");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                         //add new row
                         $("#dataTable").append(response["lastRow"]);
 
-                    }else{
-                        $("#addModal").modal("hide");
-                        //set blank value after inserting the value
-                        $("#add_class_name").val("");
-                        $("#add_comment").val("");
-                        $("#alert").html(response["alert"]);
                     }
                 }
             });
@@ -280,7 +282,7 @@
                         $("#e_update_class_name").html(response["class_name"]);
                         $("#e_update_class_status").html(response["class_status"]);
                         $("#e_update_comment").html(response["comment"]);
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
                         $("#e_update_class_name").html("");
                         $("#e_update_class_status").html("");
@@ -288,14 +290,13 @@
                         
                         //set message for alert box
                         $("#updateModal").modal("hide");
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                         $("#"+response["rowId"]).html(response["updatedRow"]);
 
-                    }else{
-                        $("#updateModal").modal("hide");
-                        $("#update_class_name").val("");
-                        $("#update_comment").val("");
-                        $("#alert").html(response["alert"]);
                     }
                 }
             });

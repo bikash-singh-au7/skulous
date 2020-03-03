@@ -60,18 +60,20 @@ class SessionSetup extends CI_Controller {
 
 		if($action == "add"){
 			$this->form_validation->set_error_delimiters("<span class='text-danger text-small'>", "</span>");
-			$this->form_validation->set_rules("session_name", "Session Name",  "required");
+			$this->form_validation->set_rules("session_name", "Session Name",  "trim|required|is_unique[session.session_name]");
 			$this->form_validation->set_rules("start_session", "Session Start Date",  "required|is_unique[session.start_session]");
 			$this->form_validation->set_rules("end_session", "Session End Date",  "required|callback_is_same|is_unique[session.end_session]");
 
 			if($this->form_validation->run()){
 				$data = [
-					"session_name" => $this->input->post("session_name"),
+					"session_name" => strtoupper($this->input->post("session_name")),
 					"start_session" => $this->input->post("start_session"),
 					"end_session" => $this->input->post("end_session")
 				];
 				if($this->work->insert_data("session", $data)){
-					$response["alert"] = "<div class='alert alert-success rounded-0 border'>Session successfully created !!</div>";
+					$response["alert"] = "Session added !!";
+					$response["message"] = "Session successfully created.";
+					$response["modal"] = "success";
 					$response["status"] = 1;
 
 					$data["action"] = "add";
@@ -81,7 +83,9 @@ class SessionSetup extends CI_Controller {
 					$response["lastRow"] = $html;
 					//
 				}else{
-					$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Session does't created !!</div>";
+					$response["alert"] = "Oops error !!";
+					$response["message"] = "Session does't created.";
+					$response["modal"] = "error";
 					$response["status"] = 2;
 				}
 			}else{
@@ -104,7 +108,10 @@ class SessionSetup extends CI_Controller {
 					"end_session" => $this->input->post("end_session")
 				];
 				if($this->work->insert_data("session", $data)){
-					$response["alert"] = "<div class='alert alert-success rounded-0 border'>Session successfully created !!</div>";
+					$response["alert"] = "Session added !!";
+					$response["message"] = "Session successfully created.";
+					$response["modal"] = "success";
+					$response["status"] = 1;
 					$response["status"] = 1;
 
 					$data["action"] = "manage-add";
@@ -114,7 +121,9 @@ class SessionSetup extends CI_Controller {
 					$response["lastRow"] = $html;
 					//
 				}else{
-					$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Session does't created !!</div>";
+					$response["alert"] = "Oops error !!";
+					$response["message"] = "Session does't created.";
+					$response["modal"] = "error";
 					$response["status"] = 2;
 				}
 			}else{
@@ -138,13 +147,15 @@ class SessionSetup extends CI_Controller {
 
 		if($this->form_validation->run()){
 			$data = [
-				"session_name" => $this->input->post("session_name"),
+				"session_name" => strtoupper($this->input->post("session_name")),
 				"start_session" => $this->input->post("start_session"),
 				"end_session" => $this->input->post("end_session"),
 				"session_status" => $this->input->post("session_status")
 			];
 			if($this->work->update_data("session", $data, ["id"=>$this->input->post("session_id")])){
-				$response["alert"] = "<div class='alert alert-success rounded-0 border'>Session successfully updated !!</div>";
+                $response["alert"] = "Updated !";
+				$response["message"] = "Session successfully updated.";
+				$response["modal"] = "success";
 				$response["status"] = 1;
 				
 				$data["action"] = "update";
@@ -155,7 +166,9 @@ class SessionSetup extends CI_Controller {
 				$response["updatedRow"] = $html;
 				
 			}else{
-				$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Session does't updated !!</div>";
+				$response["alert"] = "Oops error !";
+				$response["message"] = "Session does't updated.";
+				$response["modal"] = "error";
 				$response["status"] = 2;
 			}
 		}else{
@@ -185,10 +198,24 @@ class SessionSetup extends CI_Controller {
 	public function deleteData(){
 		$id = $this->input->post("session_id");
 		if($this->work->delete_data("session", ["id"=>$id])){
+            
+            $selected_session = $this->session->userdata("session_id");
+            if($selected_session == $id){
+                $this->session->unset_userdata("session_id");
+                $this->session->set_flashdata("alert", "<div class='alert alert-success rounded-0'>You deleted the current session please select session first.</div>");
+                $response["redirect"] = base_url('sessionsetup/session/select');
+            }else{
+                $response["redirect"] = "";
+            }
+            
 			$response["rowId"] = "row-".$id;
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Session deleted successfully !!</div>";
+			$response["alert"] = "Deleted !!";
+			$response["message"] = "Session deleted successfully !!";
+			$response["modal"] = "success";
 		}else{
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Session does't deleted !!</div>";
+			$response["alert"] = "Oops error!!";
+			$response["message"] = "Session does't deleted !!";
+			$response["modal"] = "error";
 		}
 		echo json_encode($response);
 	}
