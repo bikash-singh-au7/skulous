@@ -42,11 +42,23 @@ class Work extends CI_Model{
         
     }
 //    Search Data
-    public function search_data($table, $cond){
-        $result = $this->db->or_like($cond, "both")
-                           ->get($table)
-                           ->result();
-        return $result;
+    public function search_data($table, $cond, $or_cond){
+        
+        $this->db->select('*');
+        $this->db->where($cond);
+        $this->db->group_start();
+        $this->db->or_like($or_cond);
+        $this->db->group_end();
+        $query = $this->db->get($table);
+        // echo $this->db->last_query();
+        
+        return $query->result();
+        
+        
+//        $result = $this->db->orlike($or_cond, "both")
+//                           ->get($table)
+//                           ->result();
+//        return $result;
     }
     
     //Select Sum

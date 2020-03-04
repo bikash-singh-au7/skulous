@@ -26,7 +26,7 @@ class AdminSetup extends CI_Controller{
     
     //Inquiry Navigation
 	public function setting($action=null){
-        $data["data"] = $this->work->select_data("reg_format");
+        $data["data"] = $this->work->select_data("reg_format", ["session_id"=>$this->session->userdata("session_id")]);
 		$this->load->view("header/header.php");
         $this->load->view("sidebar/sidebar.php");
         $this->load->view("header/topmenu.php");

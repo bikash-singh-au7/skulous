@@ -3,9 +3,11 @@ date_default_timezone_set("Asia/Kolkata");
 
 //To show searched data
 if($action == 'search'){
+    $id = 0;
     foreach($result as $data){
         ?>
-            <tr>
+            <tr id="<?= "row-".$data->id?>">
+                <td><?= ++$id?></td>
                 <td><?= $data->student_name?></td>
                 <td><?= $data->father_name?></td>
                 <td>
@@ -16,18 +18,98 @@ if($action == 'search'){
                 </td>
                 <td>
                     <?php
-                        $payment = $this->work->select_data("payment", ["reg_id"=>$data->id]);
+                        $payment = $this->work->select_sum("payment", ["reg_id"=>$data->id], "amount");
                         $total_amount  = 0;
-                        foreach($payment as $p){
-                            $total_amount += $p->amount;
-                        }
-                        echo $total_amount;
+                        $total_amount = $payment[0]->amount;
+                        echo "<span class='badge badge-success'>".$total_amount."</span>";
                     ?>
+                </td>
+                <td>
+                    <?php
+                        $payment_info = $this->work->select_sum("payment", ["reg_id"=>$data->id], "amount");
+                        $total_payment = 0;
+                        $total_payment = $payment_info[0]->amount;
+                        
+                        // From Batch
+                        $batch_info = $this->work->select_data("batch", ["id"=>$data->batch_id]);
+                        $batch_fee = $batch_info[0]->batch_fee;
+                        $batch_discount = $batch_info[0]->discount;
+
+                        //From Regitration
+                        $reg_discount = $data->discount;
+
+                        //check full paid or not
+                        if($data->full_paid == 1){
+                            $dues_amount = 0;
+                            $pay_status = "<span class='badge badge-info'>Full Paid</span>";
+                        }else{
+                            $dues_amount = $batch_fee - ($batch_discount+$reg_discount+$total_payment);
+                            $pay_status = "<span class='badge badge-danger'>".$dues_amount."</span>";
+                        }
+                        echo $pay_status;
+                    ?>
+                   
+                    
                 </td>
                 <td>
                     <button class="btn btn-warning" type="button" onclick="makePayment(<?= $data->id?>)"> <i class="fa fa-rupee-sign"></i> </button>
                 </td>
             </tr>
+        <?
+    }
+}
+
+//update-row-after-pay
+if($action == 'update-row-after-pay'){
+    $id = 0;
+    foreach($result as $data){
+        ?>
+            
+                <td><?= ++$id?></td>
+                <td><?= $data->student_name?></td>
+                <td><?= $data->father_name?></td>
+                <td>
+                    <?php
+                        $batch = $this->work->select_data("batch", ["id"=>$data->batch_id]);
+                        echo date("h:m A", strtotime($batch[0]->batch_start_time))."-".date("h:m A", strtotime($batch[0]->batch_end_time));
+                    ?>
+                </td>
+                <td>
+                    <?php
+                        $payment = $this->work->select_sum("payment", ["reg_id"=>$data->id], "amount");
+                        $total_amount  = 0;
+                        $total_amount = $payment[0]->amount;
+                        echo "<span class='badge badge-success'>".$total_amount."</span>";
+                    ?>
+                </td>
+                <td>
+                   <?php
+                        $payment_info = $this->work->select_sum("payment", ["reg_id"=>$data->id], "amount");
+                        $total_payment = 0;
+                        $total_payment = $payment_info[0]->amount;
+                        
+                        // From Batch
+                        $batch_info = $this->work->select_data("batch", ["id"=>$data->batch_id]);
+                        $batch_fee = $batch_info[0]->batch_fee;
+                        $batch_discount = $batch_info[0]->discount;
+
+                        //From Regitration
+                        $reg_discount = $data->discount;
+
+                        //check full paid or not
+                        if($data->full_paid == 1){
+                            $dues_amount = 0;
+                            $pay_status = "<span class='badge badge-info'>Full Paid</span>";
+                        }else{
+                            $dues_amount = $batch_fee - ($batch_discount+$reg_discount+$total_payment);
+                            $pay_status = "<span class='badge badge-danger'>".$dues_amount."</span>";
+                        }
+                        echo $pay_status;
+                    ?>
+                </td>
+                <td>
+                    <button class="btn btn-warning" type="button" onclick="makePayment(<?= $data->id?>)"> <i class="fa fa-rupee-sign"></i> </button>
+                </td>
         <?
     }
 }

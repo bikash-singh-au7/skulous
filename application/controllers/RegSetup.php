@@ -146,17 +146,50 @@ class RegSetup extends CI_Controller {
                         
                         //=============================================
                         //For Payment
+                                                
                         $response["payment_alert"] = "";
+                        //now payment amount
                         $payment_amount = $this->input->post("payment_amount");
+                        
                         if($payment_amount != ""){
+                            //created last id
+                            $reg_id = $this->db->insert_id();
+                            //get batch fee and batch discount if available
+                            $batch_info = $this->work->select_data("batch", ["id"=>$this->input->post("batch_id")]);
+                            $batch_fee = $batch_info[0]->batch_fee;
+                            $batch_discount = $batch_info[0]->discount;
+                            
+                            //get discount from registration if available
+                            $reg_info = $this->work->select_data("registration", ["id"=>$reg_id]);
+                            $reg_discount = $reg_info[0]->discount;
+
+                            $payble_amount = $batch_fee-($batch_discount+$reg_discount);
+                            
+                            if($payment_amount >= $payble_amount){
+                                $full_paid = 1;
+                            }else{
+                                $full_paid = 0;
+                            }
+                            
+                            
                             $data = [
                                 "session_id" => $this->session->userdata("session_id"),
-                                "reg_id" => $this->db->insert_id(),
+                                "reg_id" => $reg_id,
                                 "amount" => $payment_amount,
                                 "payment_date" => $this->input->post("payment_date")
                             ];
                             if($this->work->insert_data("payment", $data)){
                                 $response["payment_alert"] = "1";
+                                //update registration table if full paid
+                                if($full_paid){
+                                    if($this->work->update_data("registration", ["full_paid"=>$full_paid], ["id"=>$reg_id])){
+                                        $response["full_paid"] = 1;
+                                    }else{
+                                        $response["full_paid"] = 0;
+                                    }
+                                }
+                                
+                                
                             }else{
                                 $response["payment_alert"] = "0";
                             }
@@ -391,7 +424,6 @@ class RegSetup extends CI_Controller {
 		$response["board"] = $data["value"][0]->board;
 		$response["batch_id"] = $data["value"][0]->batch_id;
 //		$response["payble_amount"] = $data["value"][0]->payble_amount;
-		$response["fee_amount"] = $data["value"][0]->fee_amount;
 		$response["discount"] = $data["value"][0]->discount;
 		$response["comment"] = $data["value"][0]->comment;
 		echo json_encode($response);
@@ -411,16 +443,34 @@ class RegSetup extends CI_Controller {
     //Delete data
 	public function deleteData(){
 		$id = $this->input->post("reg_id");
+        //get registration ingo
+        $reg_info = $this->work->select_data("registration", ["id"=>$id]);
+        $batch_id = $reg_info[0]->batch_id;
+        
+        //get batch info
+        $batch_info = $this->work->select_data("batch", ["id"=>$batch_id]);
+        $available_seat = $batch_info[0]->available_seat;
+        
+        
 		if($this->work->delete_data("registration", ["id"=>$id])){
-			$response["rowId"] = "row-".$id;
-			$response["alert"] = "<div class='alert alert-success rounded-0 border'>Student deleted successfully !!</div>";
+            //update batch seat
+			$this->work->update_data("batch", ["available_seat"=>$available_seat+1], ["id"=>$batch_id]);
+            
+            $response["rowId"] = "row-".$id;
+            
+			$response["alert"] = "Deleted !!";
+			$response["message"] = "Student deleted successfully !!";
+			$response["modal"] = "success";
 		}else{
-			$response["alert"] = "<div class='alert alert-danger rounded-0 border'>Student does't deleted !!</div>";
+			$response["alert"] = "Oops error !!";
+			$response["message"] = "Student does't deleted !!";
+			$response["modal"] = "error";
 		}
 		echo json_encode($response);
 	}
-// Get Payment
-   public function batchFee(){
+    
+    // Get Payment
+    public function batchFee(){
        $batch_id = $this->input->post("batch_id");
        $data["fee"] = $this->work->select_data("batch",["id"=>$batch_id]);
        $fee = $data["fee"][0]->batch_fee;
@@ -430,7 +480,7 @@ class RegSetup extends CI_Controller {
        echo json_encode($response);
    } 
     
-//Send Sms
+    //Send Sms
     public function sendsms(){
         $this->form_validation->set_rules("message", "Message", "required|trim");
         $this->form_validation->set_rules("sender", "Sender Id", "trim|exact_length[6]|alpha");
@@ -462,6 +512,121 @@ class RegSetup extends CI_Controller {
         
     }
     
+    //make Payment
+    public function makePayment($action = null){
+        if($action == "manage"){
+            $this->form_validation->set_rules("amount", "Amount", "required|trim|numeric|is_natural");
+            $this->form_validation->set_rules("payment_date", "Payment Date", "required|trim|callback_valid_payment_date_for_payment");
+            $this->form_validation->set_rules("reg_id", "Reg Id", "required|trim");
+            if($this->form_validation->run()){
+                
+                $reg_id = $this->input->post("reg_id");
+                
+                //get discount from registration if available
+                $reg_info = $this->work->select_data("registration", ["id"=>$reg_id]);
+                $reg_discount = $reg_info[0]->discount;
+                $full_paid = $reg_info[0]->full_paid;
+                $batch_id = $reg_info[0]->batch_id;
+                
+                if($full_paid){
+                    $full_paid = 0;
+                }else{
+                    //get batch fee and batch discount if available
+                    $batch_info = $this->work->select_data("batch", ["id"=>$batch_id]);
+                    $batch_fee = $batch_info[0]->batch_fee;
+                    $batch_discount = $batch_info[0]->discount;
+
+
+                    //get total payment of this student
+                    $pay_info = $this->work->select_sum("payment", ["reg_id"=>$reg_id], "amount");
+                    $total_amount = $pay_info[0]->amount;
+
+                    //get now payment amount
+                    $now_payment_amount = $this->input->post("amount");
+
+                    $dues_amount = $batch_fee-($batch_discount+$reg_discount+$total_amount+$now_payment_amount);
+
+                    if($dues_amount <= 0){
+                        $full_paid = 1;
+                    }else{
+                        $full_paid = 0;
+                    }
+                }
+                
+                
+                
+                $data = [
+                    "session_id" => $this->session->userdata("session_id"),
+                    "reg_id" => $this->input->post("reg_id"),
+                    "amount" => $this->input->post("amount"),
+                    "payment_date" => $this->input->post("payment_date")
+                ];
+
+                if($this->work->insert_data("payment", $data)){
+                    $response["status"] = 1;
+                    $response["alert"] = "Payment Done!";
+                    $response["message"] = "Payment Successfully Done.";
+                    $response["modal"] = "success";
+                    
+                    //update registration table if full paid
+                    if($full_paid){
+                        if($this->work->update_data("registration", ["full_paid"=>$full_paid], ["id"=>$reg_id])){
+                            $response["full_paid"] = 1;
+                        }else{
+                            $response["full_paid"] = 0;
+                        }
+                    }
+                    
+                    //Update the Payment Row
+                    $response["rowId"] = "row-".$this->input->post("reg_id");
+                    $data["action"] = "update";
+                    $data["result"] = $this->work->select_data("registration", ["id"=>$this->input->post("reg_id")]);
+                    $html = $this->load->view("registration/print-row", $data, true);
+                    $response["html"] = $html;
+                    
+                }else{
+                    $response["status"] = 2;
+                    $response["alert"] = "Oops error!";
+                    $response["message"] = "Payment Not Done.";
+                    $response["modal"] = "error";
+                }
+            }else{
+                $response["status"] = 0;
+                $response["amount"] = strip_tags(form_error("amount"));
+                $response["payment_date"] = strip_tags(form_error("payment_date"));
+            }
+        }else{
+            $this->form_validation->set_rules("amount", "Amount", "required|trim|numeric|is_natural");
+            $this->form_validation->set_rules("payment_date", "Payment Date", "required|trim");
+            $this->form_validation->set_rules("reg_id", "Reg Id", "required|trim");
+            if($this->form_validation->run()){
+                $data = [
+                    "session_id" => $this->session->userdata("session_id"),
+                    "reg_id" => $this->input->post("reg_id"),
+                    "amount" => $this->input->post("amount"),
+                    "payment_date" => $this->input->post("payment_date")
+                ];
+
+                if($this->work->insert_data("payment", $data)){
+                    $response["status"] = 1;
+                    $response["alert"] = "Payment Done!";
+                    $response["message"] = "Payment Successfully Done.";
+                    $response["modal"] = "success";
+                }else{
+                    $response["status"] = 2;
+                    $response["alert"] = "Oops error!";
+                    $response["message"] = "Payment Not Done.";
+                    $response["modal"] = "error";
+                }
+            }else{
+                $response["status"] = 0;
+                $response["amount"] = strip_tags(form_error("amount"));
+                $response["payment_date"] = strip_tags(form_error("payment_date"));
+            }
+        }
+		
+        echo json_encode($response);
+    }
     
     // Custom validation
     // Validation for discount amount
@@ -535,6 +700,33 @@ class RegSetup extends CI_Controller {
                 return FALSE;
             }else{
                 return TRUE;
+            }
+        }
+    }
+    
+    //Custom validation
+    public function valid_payment_date_for_payment($str){
+        if($this->input->post("amount") != ""){
+            if($str != ""){
+                //session info
+                $session_query = $this->work->select_data("session", ["id"=>$this->session->userdata("session_id")]);
+                $end_session = strtotime($session_query[0]->end_session);
+                
+                $reg_query = $this->work->select_data("registration", ["id"=>$this->input->post("reg_id")]);
+                $batch_id = $reg_query[0]->batch_id;
+
+                //batch info
+                $batch_query = $this->work->select_data("batch", ["id"=>$batch_id]);
+                $batch_start_date = strtotime($batch_query[0]->batch_start_date);
+
+                $form_date = strtotime($str);
+                if($form_date >= $batch_start_date and $form_date <= $end_session){
+                    return TRUE;
+                }else{
+                    $this->form_validation->set_message('valid_payment_date_for_payment', 'The Payment date is not valid');
+                    return FALSE;
+                }
+
             }
         }
     }

@@ -119,6 +119,8 @@
                     }else{
                         $("#e_amount").html(response["amount"]);
                         $("#e_payment_date").html(response["payment_date"]);
+                        $("#"+response["rowId"]).html(response["html"]);
+                        
                         $("#makePaymentModal").modal("hide");
                         Swal.fire(
                           response["alert"],
@@ -150,7 +152,7 @@
                     $("#loader").hide();
                 },
                 success: function(response){
-                    tHead = "<thead><tr><th>Name</th><th>Father</th><th>Batch</th><th>Amount</th><th>Pay</th></tr></thead>";
+                    tHead = "<thead><tr><th>SN</th> <th>Name</th><th>Father</th><th>Batch</th><th>Paid</th><th>Dues</th><th>Pay</th></tr></thead>";
                     tHead+="<tbody>"+response["html"]+"</tbody>";
                     if(response["html"] == ''){
                         $("#searchedData #dataTable").html("<tr> <td colstan=5 class='text-danger'>Data not found</td> </td>");

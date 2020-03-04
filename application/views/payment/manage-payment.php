@@ -47,14 +47,17 @@
                                             //get Regitration data
                                             $reg_data = $this->work->select_data("registration", ["id"=>$value->reg_id]);
                                             $student_name = $reg_data[0]->student_name;
+                                            // Full Paid
+                                            $full_paid = $reg_data[0]->full_paid;
                                             //Father name
                                             $father_name = $reg_data[0]->father_name;
                                             //Registration Id
                                             $reg_id = $reg_data[0]->id; 
                                             //Discount amount from Registration Table
-                                            $student_discount_amount = $reg_data[0]->discount;
+                                            $reg_discount = $reg_data[0]->discount;
                                             //Batch id
                                             $batch_id = $reg_data[0]->batch_id; 
+                                            
                                             //Batch information
                                             $batch_data = $this->work->select_data("batch", ["id"=>$batch_id]);
                                             $batch_name = $batch_data[0]->batch_name;
@@ -63,9 +66,9 @@
                                             $class_id = $batch_data[0]->class_id;
                                             $subject_id = $batch_data[0]->subject_id;
                                             //Batch Fee amount from Batch Table
-                                            $fee_amount = $batch_data[0]->batch_fee;
+                                            $batch_fee = $batch_data[0]->batch_fee;
                                             //Batch Discount amount from Batch Table
-                                            $batch_discount_amount = $batch_data[0]->discount;
+                                            $batch_discount = $batch_data[0]->discount;
                                             
                                             
                                         ?>
@@ -96,14 +99,13 @@
                                                 <td class="text-center">
                                                     <?php 
                                                         $sum_payment = $this->work->select_sum("payment", ["reg_id"=>$value->reg_id], "amount");
-                                                        $paid_amount = $sum_payment[0]->amount;
-                                            
-                                                        $batch_fee_after_disc = $fee_amount - ($student_discount_amount+$batch_discount_amount);
+                                                        $total_paid_amount = $sum_payment[0]->amount;
                                                         
-                                                        if($paid_amount >= $batch_fee_after_disc){
+                                                        
+                                                        if($full_paid){
                                                             echo "<span class='badge badge-info'> Full Paid</span>";
                                                         }else{
-                                                            echo "<span class='badge badge-success'>".$paid_amount."</span>";
+                                                            echo "<span class='badge badge-success'>".$total_paid_amount."</span>";
                                                         }
                                                     
                                                     ?>
@@ -112,11 +114,11 @@
                                                 <td>
                                                     <?php
                                                         //Find Due amount   
-                                                        $due_amount = $fee_amount - ($student_discount_amount+$paid_amount+$batch_discount_amount);
-                                                        if($due_amount <= 0){
-                                                            echo "<span class='badge badge-info'> No Dues</span>";
+                                                        $dues_amount = $batch_fee - ($reg_discount+$batch_discount+$total_paid_amount);
+                                                        if($full_paid){
+                                                            echo "<span class='badge badge-danger'> No Dues</span>";
                                                         }else{
-                                                            echo "<span class='badge badge-danger'>".$due_amount."</span>";
+                                                            echo "<span class='badge badge-danger'>".$dues_amount."</span>";
                                                         }
                                                         
                                                     ?>
@@ -512,7 +514,7 @@
         });
     }
     
-    //delete
+    //All delete
     function deleteData(id, number){
         $("#deleteModal").modal("show");
         $("#delete_payment_id").val(id);
@@ -539,7 +541,12 @@
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function(response){
-                    $("#"+response["rowId"]).remove();
+                    if(response["number"] == "one"){
+                        $("#"+response["rowId"]).html(response["html"]);
+                    }else{
+                        $("#"+response["rowId"]).remove();
+                    }
+                    
                     $("#deleteModal").modal("hide");
                     Swal.fire(
                       response["alert"],

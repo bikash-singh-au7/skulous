@@ -52,10 +52,10 @@ if($action == "update"){
         ?>         
             <td><?=$value->id?></td>
             <td><?=$value->student_name?></td>
-            <td class="text-center">
+            <td>
                 <?= $value->father_name; ?>
             </td>
-            <td class="text-center">
+            <td>
                 <?php
                     $data = $this->work->select_data("batch", ["id"=>$value->batch_id]);
                     echo $data[0]->batch_name;
@@ -249,9 +249,39 @@ if($action == "view"){
                     <h5 class="text-info"> <i class="fa fa-rupee-sign" bg-white></i> Payment Details</h5>
                     <?php
                         $payment_info = $this->work->select_data("payment", ["reg_id"=>$value->id]);
+                        $total_payment = 0;
+                        foreach($payment_info as $info){
+                            $total_payment += $info->amount;
+                        }
+                        
+                        // From Batch
+                        $batch_info = $this->work->select_data("batch", ["id"=>$value->batch_id]);
+                        $batch_fee = $batch_info[0]->batch_fee;
+                        $batch_discount = $batch_info[0]->discount;
+
+                        //From Regitration
+                        $reg_discount = $value->discount;
+
+                        //check full paid or not
+                        if($value->full_paid == 1){
+                            $dues_amount = 0;
+                            $pay_status = "<span class='badge badge-info'>Full Paid</span>";
+                            $note = "<span class='badge badge-warning'>The student may got some additional discount</span>";
+                        }else{
+                            $dues_amount = $batch_fee - ($batch_discount+$reg_discount+$total_payment);
+                            $pay_status = "<span class='badge badge-danger'>Unpaid</span>";
+                            $note= "";
+                        }
+                        
                         if(empty($payment_info)){
                             ?>
-                            <div class="alert alert-danger rounded-0">There is No Payment !!</div>
+                            
+                            <div class="row">
+                                <div class="col-md-6"><h6 class='font-weight-bold text-muted'>Dues Amount</h6></div>
+                                <div class="col-md-6"><h6 class='font-weight-bold text-danger'><?= $dues_amount?></h6></div>
+                                
+                            </div>
+                            
                             <?
                         }else{
                             ?>
@@ -285,28 +315,43 @@ if($action == "view"){
                                 }
                                 ?>
                                     <div class="row mt-2">
+                                       
                                         <div class="col-md-6"></div>
-                                        <div class="col-md-6">
-                                            <div class="row">
+                                        <div class="col-md-6 text-muted">
+                                            <div class="row">                                           
                                                 <div class="col-md-6 border-top">Total</div>
                                                 <div class="col-md-6 border-top"><?= $total_payment?></div>
                                             </div>
+                                           
                                             <div class="row">
-                                                <div class="col-md-6 border-top">Total Payble Amount</div>
-                                                <div class="col-md-6 border-top"><?= $value->fee_amount?></div>
+                                                <div class="col-md-6 border-top">Batch Fee</div>
+                                                <div class="col-md-6 border-top"><?= $batch_fee?></div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6 border-top">Batch Discount</div>
+                                                <div class="col-md-6 border-top"><?= $batch_discount?></div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">Student Discount</div>
+                                                <div class="col-md-6"><?= $reg_discount?></div>
                                             </div>
                                             <div class="row">
-                                                <div class="col-md-6 border-top">Discount Amount</div>
-                                                <div class="col-md-6 border-top"><?= $value->discount?></div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6 border-top">Dues Amount</div>
-                                                <div class="col-md-6 border-top">
+                                                <div class="col-md-6 border-top text-info">Dues Amount</div>
+                                                <div class="col-md-6 border-top text-info">
                                                 <?php 
-                                                    echo $value->fee_amount."-(".$total_payment."+".$value->discount.")=";
-                                                    echo $value->fee_amount-($total_payment+$value->discount);
+                                                    echo $dues_amount;
                                                 ?>
                                                 </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6 border-top">Payment Status</div>
+                                                <div class="col-md-6 border-top">
+                                                    <?= $pay_status?>
+                                                
+                                                </div>
+                                                <col-md-12><?=$note?></col-md-12>
                                             </div>
                                         </div>
                                     </div>

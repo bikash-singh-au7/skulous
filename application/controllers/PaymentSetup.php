@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set("Asia/Kolkata");
 
 class PaymentSetup extends CI_Controller {
     public function __construct() {
@@ -37,9 +38,43 @@ class PaymentSetup extends CI_Controller {
     public function makePayment($action = null){
         if($action == "manage"){
             $this->form_validation->set_rules("amount", "Amount", "required|trim|numeric|is_natural");
-            $this->form_validation->set_rules("payment_date", "Payment Date", "required|trim");
+            $this->form_validation->set_rules("payment_date", "Payment Date", "required|trim|callback_valid_payment_date");
             $this->form_validation->set_rules("reg_id", "Reg Id", "required|trim");
             if($this->form_validation->run()){
+                
+                $reg_id = $this->input->post("reg_id");
+                
+                //get discount from registration if available
+                $reg_info = $this->work->select_data("registration", ["id"=>$reg_id]);
+                $reg_discount = $reg_info[0]->discount;
+                $full_paid = $reg_info[0]->full_paid;
+                $batch_id = $reg_info[0]->batch_id;
+                
+                if($full_paid){
+                    $full_paid = 0;
+                }else{
+                    //get batch fee and batch discount if available
+                    $batch_info = $this->work->select_data("batch", ["id"=>$batch_id]);
+                    $batch_fee = $batch_info[0]->batch_fee;
+                    $batch_discount = $batch_info[0]->discount;
+
+
+                    //get total payment of this student
+                    $pay_info = $this->work->select_sum("payment", ["reg_id"=>$reg_id], "amount");
+                    $total_amount = $pay_info[0]->amount;
+
+                    //get now payment amount
+                    $now_payment_amount = $this->input->post("amount");
+
+                    $dues_amount = $batch_fee-($batch_discount+$reg_discount+$total_amount+$now_payment_amount);
+
+                    if($dues_amount <= 0){
+                        $full_paid = 1;
+                    }else{
+                        $full_paid = 0;
+                    }
+                }
+                
                 $data = [
                     "session_id" => $this->session->userdata("session_id"),
                     "reg_id" => $this->input->post("reg_id"),
@@ -52,6 +87,15 @@ class PaymentSetup extends CI_Controller {
                     $response["alert"] = "Payment Done!";
                     $response["message"] = "Payment Successfully Done.";
                     $response["modal"] = "success";
+                    
+                    //update registration table if full paid
+                    if($full_paid){
+                        if($this->work->update_data("registration", ["full_paid"=>$full_paid], ["id"=>$reg_id])){
+                            $response["full_paid"] = 1;
+                        }else{
+                            $response["full_paid"] = 0;
+                        }
+                    }
                     
                     //Update the Payment Row
                     $response["rowId"] = "row-".$this->input->post("reg_id");
@@ -73,9 +117,43 @@ class PaymentSetup extends CI_Controller {
             }
         }else{
             $this->form_validation->set_rules("amount", "Amount", "required|trim|numeric|is_natural");
-            $this->form_validation->set_rules("payment_date", "Payment Date", "required|trim");
+            $this->form_validation->set_rules("payment_date", "Payment Date", "required|trim|callback_valid_payment_date");
             $this->form_validation->set_rules("reg_id", "Reg Id", "required|trim");
             if($this->form_validation->run()){
+                $reg_id = $this->input->post("reg_id");
+                
+                //get discount from registration if available
+                $reg_info = $this->work->select_data("registration", ["id"=>$reg_id]);
+                $reg_discount = $reg_info[0]->discount;
+                $full_paid = $reg_info[0]->full_paid;
+                $batch_id = $reg_info[0]->batch_id;
+                
+                if($full_paid){
+                    $full_paid = 0;
+                }else{
+                    //get batch fee and batch discount if available
+                    $batch_info = $this->work->select_data("batch", ["id"=>$batch_id]);
+                    $batch_fee = $batch_info[0]->batch_fee;
+                    $batch_discount = $batch_info[0]->discount;
+
+
+                    //get total payment of this student
+                    $pay_info = $this->work->select_sum("payment", ["reg_id"=>$reg_id], "amount");
+                    $total_amount = $pay_info[0]->amount;
+
+                    //get now payment amount
+                    $now_payment_amount = $this->input->post("amount");
+
+                    $dues_amount = $batch_fee-($batch_discount+$reg_discount+$total_amount+$now_payment_amount);
+
+                    if($dues_amount <= 0){
+                        $full_paid = 1;
+                    }else{
+                        $full_paid = 0;
+                    }
+                }
+                
+                
                 $data = [
                     "session_id" => $this->session->userdata("session_id"),
                     "reg_id" => $this->input->post("reg_id"),
@@ -88,6 +166,24 @@ class PaymentSetup extends CI_Controller {
                     $response["alert"] = "Payment Done!";
                     $response["message"] = "Payment Successfully Done.";
                     $response["modal"] = "success";
+                    
+                    //update registration table if full paid
+                    if($full_paid){
+                        if($this->work->update_data("registration", ["full_paid"=>$full_paid], ["id"=>$reg_id])){
+                            $response["full_paid"] = 1;
+                        }else{
+                            $response["full_paid"] = 0;
+                        }
+                    }
+                    
+                    //Update the Payment Row
+                    $response["rowId"] = "row-".$this->input->post("reg_id");
+                    $data["result"] = $this->work->select_data("registration", ["id"=>$this->input->post("reg_id")]);
+                    $data["action"] = "update-row-after-pay";
+                    $html = $this->load->view("payment/print-row.php",$data, true);
+                    $response["html"] = $html;
+                    
+                    
                 }else{
                     $response["status"] = 2;
                     $response["alert"] = "Oops error!";
@@ -116,7 +212,7 @@ class PaymentSetup extends CI_Controller {
                     "student_mobile"=>$_POST["search"],
                     "student_email"=>$_POST["search"]
                 ];
-				$data["result"] = $this->work->search_data("registration", $cond);
+				$data["result"] = $this->work->search_data("registration", ["session_id"=>$this->session->userdata("session_id")] ,$cond);
                 $data["action"] = "search";
                 
                 $html = $this->load->view("payment/print-row.php", $data, true);
@@ -274,11 +370,67 @@ class PaymentSetup extends CI_Controller {
     //Delete Single-Single Payment
 	public function deleteSinglePayment(){
 		$id = $this->input->post("payment_id");
+        $pay_info = $this->work->select_data('payment', ["id"=>$id]);
+        $reg_id = $pay_info[0]->reg_id;
+
+        //Now deleted amount
+        $deletable_amount = $pay_info[0]->amount;
+
+        //get discount from registration if available
+        $reg_info = $this->work->select_data("registration", ["id"=>$reg_id]);
+        $reg_discount = $reg_info[0]->discount;
+        $full_paid = $reg_info[0]->full_paid;
+        $batch_id = $reg_info[0]->batch_id;
+
+
+        //get batch fee and batch discount if available
+        $batch_info = $this->work->select_data("batch", ["id"=>$batch_id]);
+        $batch_fee = $batch_info[0]->batch_fee;
+        $batch_discount = $batch_info[0]->discount;
+
+
+        //get total payment of this student
+        $pay_info = $this->work->select_sum("payment", ["reg_id"=>$reg_id], "amount");
+        $total_amount = $pay_info[0]->amount;
+
+        //Total would after delete
+        $total_after_deleted = $total_amount-$deletable_amount;
+
+
+        $total_payble = $batch_fee-($batch_discount+$reg_discount);
+
+        if($total_after_deleted >= $total_payble){
+            $full_paid = 1;
+        }else{
+            $full_paid = 0;
+        }
+
+            
+        
 		if($this->work->delete_data("payment", ["id"=>$id])){
 			$response["rowId"] = "pay".$id;
 			$response["alert"] = "Data deleted!";
 			$response["message"] = "Payment deleted successfully !!";
             $response["modal"] = "success";
+            
+            //update registration table if full paid
+            if($full_paid == 0){
+                if($this->work->update_data("registration", ["full_paid"=>0], ["id"=>$reg_id])){
+                    $response["full_paid"] = 1;
+                }else{
+                    $response["full_paid"] = 0;
+                }
+            }
+            
+            //Update the Payment Row
+            $response["number"] = "one";
+            $response["rowId"] = "row-".$reg_id;
+            $data["data"] = $this->work->select_data("registration", ["id"=>$reg_id]);
+            $data["action"] = "manage-update";
+            $html = $this->load->view("payment/print-row.php",$data, true);
+            $response["html"] = $html;
+            
+            
 		}else{
             $response["alert"] = "Not deleted!";
 			$response["message"] = "Data does't Deleted.";
@@ -296,6 +448,15 @@ class PaymentSetup extends CI_Controller {
 			$response["alert"] = "Data deleted!</div>";
 			$response["message"] = "Payment deleted successfully !!";
 			$response["modal"] = "success";
+            
+            //update registration table if delete amount
+            if($this->work->update_data("registration", ["full_paid"=>0], ["id"=>$reg_id])){
+                $response["full_paid"] = 0;
+            }else{
+                $response["full_paid"] = 1;
+            }
+            
+            
 		}else{
             $response["alert"] = "Not deleted!</div>";
 			$response["message"] = "Data does't Deleted.";
@@ -339,7 +500,32 @@ class PaymentSetup extends CI_Controller {
         
     }
     
+    //Custom validation
+    public function valid_payment_date($str){
+        if($this->input->post("amount") != ""){
+            if($str != ""){
+                //session info
+                $session_query = $this->work->select_data("session", ["id"=>$this->session->userdata("session_id")]);
+                $end_session = strtotime($session_query[0]->end_session);
+                
+                $reg_query = $this->work->select_data("registration", ["id"=>$this->input->post("reg_id")]);
+                $batch_id = $reg_query[0]->batch_id;
 
+                //batch info
+                $batch_query = $this->work->select_data("batch", ["id"=>$batch_id]);
+                $batch_start_date = strtotime($batch_query[0]->batch_start_date);
+
+                $form_date = strtotime($str);
+                if($form_date >= $batch_start_date and $form_date <= $end_session){
+                    return TRUE;
+                }else{
+                    $this->form_validation->set_message('valid_payment_date', 'The Payment date is not valid');
+                    return FALSE;
+                }
+
+            }
+        }
+    }
 
 }
 

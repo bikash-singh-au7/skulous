@@ -1,3 +1,7 @@
+<?php
+    date_default_timezone_set("Asia/Kolkata");
+    $today = date("Y-m-d");
+?>
 <div class="container-fluid">
     <div class="row p-0">
         <div class="col-md-11 m-auto">
@@ -41,10 +45,10 @@
                                             <tr id="row-<?=$value->id?>">
                                                 <td><?=$value->id?></td>
                                                 <td><?=$value->student_name?></td>
-                                                <td class="text-center">
+                                                <td>
                                                     <?= $value->father_name; ?>
                                                 </td>
-                                                <td class="text-center">
+                                                <td>
                                                     <?php
                                                         $data = $this->work->select_data("batch", ["id"=>$value->batch_id]);
                                                         echo $data[0]->batch_name;
@@ -123,7 +127,7 @@
 
         <!--Update Modal Form-->
         <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                 <div class="modal-header">
                     <h6 class="modal-title" id="updateModallabel">Update Batch Information</h6>
@@ -263,16 +267,7 @@
                                                 <span class="text-danger" id="e_pin_code"></span>
                                             </div>
                                         </div>
-                                        
-<!--
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="font-weight-bold">Profile Picture</label>  
-                                                <input type="file" name="profile_pic" class="form-control">
-                                                <span class="text-danger" id="e_profile_pic"></span>
-                                            </div>
-                                        </div> 
--->
+                                       
                             
                                     </div> 
                                 </div>   
@@ -320,14 +315,6 @@
                                         </div>
                                     </div>
                                    
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label class="font-weight-bold">Payble Amount </label>
-                                            <input type="hidden" name="fee_amount" placeholder="Total Fee Amount" class="form-control pl-2" readonly id="fee_amount"> 
-                                            <input type="text" id="payble_amount" name="payble_amount" class="form-control" readonly>
-                                            <span class="text-danger" id="e_payble_amount"></span>
-                                        </div> 
-                                    </div> 
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label class="font-weight-bold">Discount </label>
@@ -382,7 +369,7 @@
         
         <!--View Data Modal--->
         <div class="modal fade" id="viewModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
-            <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h6 class="modal-title" id="updateModallabel"> <i class="fa fa-eye"></i> Student Information</h6>
@@ -438,6 +425,39 @@
                 </div>
             </div>
         </div>
+        
+        <!--Make Payment--->
+        <div class="modal fade" id="makePaymentModal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="updateModallabel"> <i class="fa fa-rupee-sign"></i> Make Payment</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="" method="post" id="paymentForm">
+                            <div class="form-group">
+                                <label for="" class="text-muted">Payment Amount </label>
+                                <input type="hidden" class="form-control" id="payment_reg_id" name='reg_id'>
+                                <input type="number" class="form-control" maxlength="6" name="amount" id="amount">
+                                <span class="text-danger" id="e_amount"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="text-muted">Payment Date <span class="text-danger">*</span> </label>
+                                <input type="date" class="form-control" value="<?= $today?>" id="payment_date" name='payment_date'>
+                                <span class="text-danger" id="e_payment_date"></span>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-info" form="paymentForm">Send</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>  
     </div>
 </div>
 
@@ -445,6 +465,43 @@
 <!---Ajax here-->
 
 <script>
+    //Make Payment
+    function makePayment(x){
+        $("#payment_reg_id").val(x);
+        $("#amount").val("");
+        $("#e_amount").html("");
+        $("#e_payment_date").html("");
+        $("#makePaymentModal").modal("show");
+    }
+    
+    $(function(){
+        $("#paymentForm").on("submit", function(e){
+            e.preventDefault();
+            $.ajax({
+                url: "<?= base_url('regSetup/makePayment/manage')?>",
+                type: "POST",
+                data : $(this).serialize(),
+                dataType: "json",
+                success: function(response){
+                    if(response["status"]==0){
+                        $("#e_amount").html(response["amount"]);
+                        $("#e_payment_date").html(response["payment_date"]);
+                    }else{
+                        $("#makePaymentModal").modal("hide");
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        )
+                        
+                        //Update payment row
+                        $("#"+response["rowId"]).html(response["html"]);
+                    }
+                }
+            });
+        })
+    });
+    
     
     //For send sms
     function sendSma(id){
@@ -579,7 +636,11 @@
                 success: function(response){
                     $("#"+response["rowId"]).remove();
                     $("#deleteModal").modal("hide");
-                    $("#alert").html(response["alert"]);
+                    Swal.fire(
+                      response["alert"],
+                      response["message"],
+                      response["modal"]
+                    );
                 }
             });
         })
@@ -648,7 +709,6 @@
                     $("#school").val(response["school"]);
                     $("#board").val(response["board"]);
                     $("#batch_id option[value="+response["batch_id"]+"]").attr('selected', 'selected');
-                    $("#fee_amount").val(response["fee_amount"]);
                     $("#payble_amount").val(response["fee_amount"]);
                     $("#discount").val(response["discount"]);
                     $("#comment").val(response["comment"]);
