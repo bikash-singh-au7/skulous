@@ -31,17 +31,27 @@
                         <div class="btn-group">
                            
                            <?php
-                                $profile_url = base_url("AdminSetup/profile");
-                                $setting_url = base_url("AdminSetup/setting");
-                                $logout_url = base_url("AdminSetup/logout");
+                                if($this->session->userdata("type") == "staff"){
+                                    $profile_url = base_url("StaffSetup/profile");
+                                    $setting_url = base_url("StaffSetup/setting");
+                                    $logout_url = base_url("welcome/stafflogout");
+                                    $type = "Staff";
+                                }else{
+                                    $profile_url = base_url("AdminSetup/profile");
+                                    $setting_url = base_url("AdminSetup/setting");
+                                    $logout_url = base_url("welcome/logoutogout");
+                                    $type = "Admin";
+                                }
+                                
+                                
                            ?>
                            
                            
-                            <button type="button" class="btn btn-info rounded-0" data-toggle="dropdown"> <i class="fa fa-user"></i> Admin</button>
+                            <button type="button" class="btn btn-info rounded-0" data-toggle="dropdown"> <i class="fa fa-user"></i> <?= $type?></button>
                             <div class="dropdown-menu dropdown-menu-right p-0 border-0 shadow-sm rounded-0">
                                 <a href="<?= $profile_url;?>" class="dropdown-item px-3"> <i class="fa fa-user"></i> Profile</a>
                                 <a href="<?= $setting_url;?>" class="dropdown-item px-3"> <i class="fa fa-cog"></i> Setting</a>
-                                <a href="<?= $logout_url;?>" class="dropdown-item px-3"> <span class="fa fa-log-in"></span> Logout</a>
+                                <a href="<?= $logout_url;?>" class="dropdown-item px-3"> <span class="fa fa-power-off"></span> Logout</a>
                             </div>
                         </div>
                 </div>

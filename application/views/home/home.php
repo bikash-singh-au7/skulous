@@ -79,7 +79,15 @@
                <div class="card color-card bg-info">
                  <i id="fa" class="fa fa-graduation-cap"></i> 
                  <span>
-                   0
+                   <?php
+                    $total_student = $this->work->count_data("registration", ["session_id"=>$this->session->userdata("session_id")]);  
+                    if($total_student == 0){
+                        echo 0;
+                    }else{
+                        echo $total_student;
+                    }
+                     
+                   ?>
                  </span> 
                  <p>Total Students</p>   
                </div>
@@ -91,9 +99,14 @@
                <div class="card color-card bg-danger">
                 <i id="fa" class="fa fa-users"></i> 
                  <span>
-                   <?php
-                       echo 0;
-                   ?>  
+                 <?php
+                    $total_inquiry = $this->work->count_data("inquiry", ["session_id"=>$this->session->userdata("session_id")]);  
+                    if($total_inquiry == 0){
+                        echo 0;
+                    }else{
+                        echo $total_inquiry;
+                    }     
+                 ?> 
                  </span> 
                  <p>Total Inquiry</p>    
                </div>
@@ -106,7 +119,12 @@
                 <i id="fa" class="fa fa-rupee-sign"></i> 
                  <span>
                    <?php
-                       echo 0;  
+                       $total_fee_collection = $this->work->select_sum("payment", ["session_id"=>$this->session->userdata("session_id")], "amount");  
+                        if($total_fee_collection[0]->amount == 0){
+                            echo 0;
+                        }else{
+                            echo $total_fee_collection[0]->amount;
+                        }  
                    ?>  
                  </span>  
                  <p>Total Fee Collection</p>    
@@ -118,7 +136,12 @@
            <a href="#">
                <div class="color-card bg-primary">
                 <i id="fa" class="fa fa-user" ></i> 
-                 <span> <?= 0;?> </span> 
+                 <span>
+                 <?php
+                    
+                     
+                 ?>
+                 </span> 
                  <p>Total Unpaid Student.</p> 
                </div>
            </a>

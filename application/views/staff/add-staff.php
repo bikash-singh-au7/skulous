@@ -24,25 +24,12 @@
                             <div class="col-md-4">
                              <div class="form-group">
                               <!--Months-->     
-                              <label class="font-weight-bold">First Name <span class="text-danger">*</span></label>
-                              <input type="text" name="first_name" value="" class="form-control block pl-2" placeholder="First Name"> 
-                              <span class="text-danger" id="e_first_name"></span>
+                              <label class="font-weight-bold">Staff Name <span class="text-danger">*</span></label>
+                              <input type="text" name="staff_name" value="" class="form-control block pl-2" placeholder="First Name"> 
+                              <span class="text-danger" id="e_staff_name"></span>
                              </div> 
                             </div> 
-                            <div class="col-md-4">
-                             <div class="form-group">
-                               <label class="font-weight-bold">Middle Name </label>     
-                               <input type="text" name="middle_name" value="" class="form-control" placeholder="Middle Name">
-                               <span class="text-danger" id="e_middle_name"></span>
-                             </div>
-                            </div>
-                            <div class="col-md-4">
-                             <div class="form-group">
-                               <label class="font-weight-bold">Last Name <span class="text-danger">*</span></label>     
-                               <input type="text" name="last_name" value="" class="form-control" placeholder="Last Name" >
-                               <span class="text-danger" id="e_last_name"></span>
-                             </div>
-                            </div> 
+                            
                             <div class="col-md-4">
                              <div class="form-group">
                                <label class="font-weight-bold">Gender <span class="text-danger">*</span></label>     
@@ -68,7 +55,7 @@
                                  <span class="text-danger" id="e_email"></span>
                              </div>
                             </div> 
-                            <div class="col-md-12">
+                            <div class="col-md-8">
                              <div class="form-group">
                                <label class="font-weight-bold">Address <span class="text-danger">*</span></label>  
                                  <input type="text" name="address" value="" class="form-control" placeholder="Full Address">
@@ -115,19 +102,15 @@
                 success: function(response){
                     if(response["status"] == 0){
                         //set error message 
-                        $("#e_first_name").html(response["first_name"]);
-                        $("#e_middle_name").html(response["middle_name"]);
-                        $("#e_last_name").html(response["last_name"]);
+                        $("#e_staff_name").html(response["staff_name"]);
                         $("#e_gender").html(response["gender"]);
                         $("#e_mobile_number").html(response["mobile_number"]);
                         $("#e_email").html(response["email"]);
                         $("#e_address").html(response["address"]);
                         
-                    }else if(response["status"] == 1){
+                    }else{
                         //set blank value for error message
-                        $("#e_first_name").html("");
-                        $("#e_middle_name").html("");
-                        $("#e_last_name").html("");
+                        $("#e_staff_name").html("");
                         $("#e_gender").html("");
                         $("#e_mobile_number").html("");
                         $("#e_email").html("");
@@ -137,10 +120,11 @@
                         //set blank value after inserting the value
                         $(".form-control").val("");
                         //set message for alert box
-                        $("#alert").html(response["alert"]);
-                    }else{
-                        $(".form-control").val("");
-                        $("#alert").html(response["alert"]);
+                        Swal.fire(
+                          response["alert"],
+                          response["message"],
+                          response["modal"]
+                        );
                     }
                 }
             });

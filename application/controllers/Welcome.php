@@ -5,7 +5,7 @@ class Welcome extends CI_Controller {
     public function __construct() {
 		parent::__construct();
 		//check login session is set or not
-		if(!$this->session->userdata("id") && !$this->session->userdata("display_name")){
+		if(!$this->session->userdata("id") && !$this->session->userdata("display_name") && !$this->session->userdata("type")){
             redirect(base_url("auth"));
 		}
 		//check session is set or not
@@ -531,7 +531,16 @@ class Welcome extends CI_Controller {
 		$this->session->unset_userdata("id");
 		$this->session->unset_userdata("display_name");
 		$this->session->unset_userdata("session_id");
-		redirect(base_url("welcome"));
+		redirect(base_url("auth"));
+	}
+    
+    
+	//Logout Section
+	public function staffLogout(){
+		$this->session->unset_userdata("id");
+		$this->session->unset_userdata("display_name");
+		$this->session->unset_userdata("session_id");
+		redirect(base_url("staffauth"));
 	}
 	
 }

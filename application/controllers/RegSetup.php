@@ -39,7 +39,41 @@ class RegSetup extends CI_Controller {
             $this->load->view("header/topmenu.php");
 			$this->load->view("registration/manage-registration.php", $data);
 			$this->load->view("footer/footer.php");
-		}
+		}elseif($action == "report"){
+            $data["batch"] = $this->work->select_data("batch", ["session_id"=>$this->session->userdata("session_id")]);
+            $data["data"] = $this->work->select_data("registration",["session_id" => $this->session->userdata('session_id')]);
+            if($subaction == "generate"){
+                $batch_id = $this->input->post("batch_id");
+                $date = $this->input->post("date");
+                if($batch_id == "" && $date == ""){
+                    $cond = ["session_id"=>$this->session->userdata("session_id")];
+                }else{
+                    $cond = ["session_id"=>$this->session->userdata("session_id")];
+
+                    //for batch
+                    if($batch_id != ""){
+                        $cond["batch_id"]=$batch_id;
+                    }
+                    //for dateSELECT * FROM `registration` where Date(created_date) = '2020-03-04'
+                    if($date != ""){
+                        $cond["Date(created_date)"]=$date;
+                    }
+
+                }
+                $data["data"] = $this->work->select_data("registration", $cond);
+                $this->load->view("header/header.php");
+                $this->load->view("sidebar/sidebar.php");
+                $this->load->view("header/topmenu.php");
+                $this->load->view("registration/report.php", $data);
+                $this->load->view("footer/footer.php");
+            }else{
+                $this->load->view("header/header.php");
+                $this->load->view("sidebar/sidebar.php");
+                $this->load->view("header/topmenu.php");
+                $this->load->view("registration/report.php", $data);
+                $this->load->view("footer/footer.php");
+            }
+        }
     }
     
     //Add Student
@@ -479,6 +513,32 @@ class RegSetup extends CI_Controller {
        $response["discount"]= $data["fee"][0]->discount;
        echo json_encode($response);
    } 
+    
+    // Generate Report
+    public function report(){
+        $batch_id = $this->input->post("batch_id");
+        $date = $this->input->post("date");
+        if($batch_id == "" && $date == ""){
+            $cond = ["session_id"=>$this->session->userdata("session_id")];
+        }else{
+            $cond = ["session_id"=>$this->session->userdata("session_id")];
+            
+            //for batch
+            if($batch_id != ""){
+                $cond["batch_id"]=$batch_id;
+            }
+            //for dateSELECT * FROM `registration` where Date(created_date) = '2020-03-04'
+            if($date != ""){
+                $cond["Date(created_date)"]=$date;
+            }
+            
+        }
+        $data["action"] = "report";
+        $data["data"] = $this->work->select_data("registration", $cond);
+        $html = $this->load->view("registration/print-row", $data, true);
+        $response["html"] = $html;
+        echo json_encode($response);
+    }
     
     //Send Sms
     public function sendsms(){

@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <title>Skulous: Staff Login</title>
+    <title>Skulous: Student Login</title>
 
     <!--Data Table-->
     
@@ -62,7 +62,7 @@
                     }
                 ?>
                 
-                <form action="<?= base_url('staffauth')?>" method="post">
+                <form action="<?= base_url('studentauth')?>" method="post">
                     <div class="">
                         <img src="http://localhost/skulous/assets/images/logo.png" class="img img-responsive img-fluid" alt="">
                         <div class="">

@@ -41,6 +41,33 @@ class Work extends CI_Model{
         return $query->result();
         
     }
+    
+    
+    public function select_unpaid_student($table, $cond=null){
+        
+        $this->db->select('*');
+        $this->db->group_by("reg_id");
+        $this->db->from($table);
+        $this->db->where($cond);
+        $query = $this->db->get();
+            
+        return $query->result();
+        
+    }
+    
+    public function select_join($cond=null){
+        $this->db->select('*');
+        $this->db->from('registration');
+        $this->db->where($cond);
+        $this->db->join('payment', 'registration.id = payment.reg_id');
+        $this->db->group_by("payment.reg_id");
+        $query = $this->db->get();
+        
+        
+        return $query->result();
+    }
+    
+    
 //    Search Data
     public function search_data($table, $cond, $or_cond){
         
@@ -67,6 +94,12 @@ class Work extends CI_Model{
         $this->db->select_sum($col);
         $query = $this->db->get($table);
         return $query->result();
+    }  
+    //Count Data
+    public function count_data($table, $cond=null){
+        $this->db->where($cond);
+        $query = $this->db->get($table);
+        return $query->num_rows();
     }   
     //Select Max
     public function select_max($table, $cond=null, $col=null){

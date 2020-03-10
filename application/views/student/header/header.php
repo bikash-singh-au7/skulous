@@ -41,10 +41,8 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('#dataTable').DataTable({
-                "order": [[ 0, "desc" ]]
-            });
-        });
+            $('#dataTable').DataTable();
+        } );
     </script>
     <!--Sweet Alert-->
     <script src="<?= base_url('assets/sweetalert/dist/sweetalert2.js')?>"></script>

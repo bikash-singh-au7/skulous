@@ -31,7 +31,125 @@ class PaymentSetup extends CI_Controller {
             $this->load->view("header/topmenu.php");
 			$this->load->view("payment/manage-payment.php", $data);
 			$this->load->view("footer/footer.php");
-		}
+		}elseif($action == 'report'){
+            $data["action"] = "";
+            
+            $data["data"] = $this->work->select_destnict_data("payment", ["session_id"=>$this->session->userdata('session_id')], "reg_id");
+            $data["batch"] = $this->work->select_data("batch", ["session_id"=>$this->session->userdata("session_id")]);
+            
+            if($subaction == "generate"){
+                $batch_id = $this->input->post("batch_id");
+                $amount = $this->input->post("amount");
+                $date = $this->input->post("date");
+                if($batch_id == "" && $date == "" && $amount == ""){
+                    $data["data"] = $this->work->select_destnict_data("payment", ["session_id"=>$this->session->userdata('session_id')], "reg_id");
+                }else{
+
+                    //for batch
+                    if($batch_id != "" && $date =="" && $amount == ""){
+                        $cond = [
+                            "registration.session_id"=>$this->session->userdata("session_id"),
+                            "registration.batch_id"=>$batch_id
+                        ];
+                        
+                        $data["data"] = $this->work->select_join($cond);
+                    }
+                    //for date
+                    if($batch_id == "" && $date !="" && $amount == ""){
+                        
+                        $cond = [
+                            "registration.session_id"=>$this->session->userdata("session_id"),
+                            "payment.payment_date"=>$date
+                        ];
+                        
+//                        $cond["Date(created_date)"]=$date;
+                        $data["data"] = $this->work->select_join($cond);
+                        $data["action"] = "date";
+                    }
+
+                    if($batch_id == "" && $date =="" && $amount != ""){
+                        if($amount == "fullpaid"){
+                            $cond = [
+                                "registration.session_id"=>$this->session->userdata("session_id"),
+                                "registration.full_paid"=>1
+                            ];
+                            $data["data"] = $this->work->select_join($cond);
+                        }elseif($amount == "unpaid"){
+                            $cond = [
+                                "registration.session_id"=>$this->session->userdata("session_id"),
+                            ];
+                            
+                            $r = [];
+                            $p = $this->work->select_data("registration", $cond);
+                            foreach($p as $pp){
+                                $id = $pp->id;
+                                $q = $this->work->select_data("payment", ["reg_id"=>$id]);
+                                if(empty($q[0])){
+                                    $r[] = $pp;
+                                }
+                            }
+                            
+                            $data["data"] = $r;
+                            $data["action"] = "unpaid";
+                            
+                        }
+                    }
+                    
+                    if($batch_id != "" && $amount != ""){
+                        if($amount == "fullpaid"){
+                            $cond = [
+                                "registration.session_id"=>$this->session->userdata("session_id"),
+                                "registration.batch_id"=>$batch_id,
+                                "registration.full_paid"=>1,
+                            ];
+                            $data["data"] = $this->work->select_join($cond);
+                        }elseif($amount == "unpaid"){
+                            $cond = [
+                                "registration.session_id"=>$this->session->userdata("session_id"),
+                                "registration.batch_id"=>$batch_id,
+                            ];
+                            
+                            $r = [];
+                            $p = $this->work->select_data("registration", $cond);
+                            foreach($p as $pp){
+                                $id = $pp->id;
+                                $q = $this->work->select_data("payment", ["reg_id"=>$id]);
+                                if(empty($q[0])){
+                                    $r[] = $pp;
+                                }
+                            }
+                            
+                            $data["data"] = $r;
+                            $data["action"] = "unpaid";
+                            
+                        }
+                    }
+                    
+                    if($batch_id != "" && $date != ""){
+                         $cond = [
+                            "registration.session_id"=>$this->session->userdata("session_id"),
+                            "registration.batch_id"=>$batch_id,
+                            "payment.payment_date"=>$date
+                        ];
+                        
+                        $data["data"] = $this->work->select_join($cond);
+                        $data["action"] = "date";
+                    }
+                }
+                $this->load->view("header/header.php");
+                $this->load->view("sidebar/sidebar.php");
+                $this->load->view("header/topmenu.php");
+                $this->load->view("payment/report.php", $data);
+                $this->load->view("footer/footer.php");
+                
+            }else{
+                $this->load->view("header/header.php");
+                $this->load->view("sidebar/sidebar.php");
+                $this->load->view("header/topmenu.php");
+                $this->load->view("payment/report.php", $data);
+                $this->load->view("footer/footer.php");
+            }
+        }
     }
     
     //make Payment
