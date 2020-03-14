@@ -84,7 +84,7 @@
                     </div>
                 </form>
                 <div class="text-right">
-                    <a href="" class="text-primary">Forget Password?</a>
+                    <a href="<?= base_url("forgetPassword/student")?>" class="text-primary">Forget Password?</a>
                 </div>
             </div>
             

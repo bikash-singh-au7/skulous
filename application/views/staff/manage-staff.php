@@ -124,6 +124,17 @@
                             
                         </div>
                         <div class="form-group">
+                            <label for="">Gender <span class="text-danger">*</span></label>
+                            <select name="gender" id="update_gender" class="form-control">
+                                <option value="">--Gender--</option>
+                                <option value="MALE">MALE</option>
+                                <option value="FEMALE">FEMALE</option>
+                            </select>
+                            <span class="text-danger" id="e_update_gender"></span>
+                            
+                        </div> 
+                           
+                        <div class="form-group">
                             <label for="">Mobile Number <span class="text-danger">*</span></label>
                             <input type="text" name="mobile_number" class="form-control" value="" placeholder="Enter subject name" id="update_mobile_number">
                             <span class="text-danger" id="e_update_mobile_number"></span>
@@ -348,13 +359,15 @@
     function getId(id){
         $("#updateModal").modal("show");
         $("#update_staff_id").val(id);
+        $("#update_staff_status").removeAttr("selected");
+        $("#update_gender").removeAttr("selected");
         $.ajax({
                 url: '<?= base_url("staffsetup/getData")?>',
                 type: 'POST',
                 data: {staff_id:id},
                 dataType: 'json',
                 success: function(response){
-                    $("#update_subject_id").val(response["sfatt_id"]);
+                    $("#update_gender option[value="+response["gender"]+"]").attr('selected', 'selected');
                     $("#update_staff_name").val(response["staff_name"]);
                     $("#update_mobile_number").val(response["mobile_number"]);
                     $("#update_email").val(response["email"]);
@@ -420,6 +433,7 @@
                     if(response["status"] == 0){
                         //set error message 
                         $("#e_update_staff_name").html(response["staff_name"]);
+                        $("#e_update_gender").html(response["gender"]);
                         $("#e_update_mobile_number").html(response["mobile_number"]);
                         $("#e_update_email").html(response["email"]);
                         $("#e_update_staff_status").html(response["staff_status"]);

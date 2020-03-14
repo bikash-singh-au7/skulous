@@ -15,7 +15,7 @@ class Auth extends CI_Controller{
         if($this->form_validation->run()){
             $data = [
                 "user_name" => $_POST["user_name"],
-                "password" => $_POST["user_password"],
+                "password" => md5($_POST["user_password"]),
                 "admin_status" => 1
             ];
             $this->load->model("work");            
@@ -25,6 +25,7 @@ class Auth extends CI_Controller{
                 foreach($info as $value){
                     $this->session->set_userdata("id", $value->id);
                     $this->session->set_userdata("display_name", $value->admin_name);
+                    $this->session->set_userdata("type", "admin");
                     redirect(base_url("welcome"));
                 }
                 

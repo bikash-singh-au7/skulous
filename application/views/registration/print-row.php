@@ -98,6 +98,7 @@ if($action == "update"){
     }
 }
 
+//Show
 if($action == "view"){
     foreach($data as $value){
         ?>
@@ -237,7 +238,7 @@ if($action == "view"){
                                     <h6 class='font-weight-bold text-muted'>Password</h6>
                                 </div>
                                 <div class="col-md-8 float-right">
-                                    <h6 class="text-muted"><?= $value->password?> </h6>
+                                    <h6 class="text-muted">****** </h6>
                                 </div>
                             </div>
                         </div>

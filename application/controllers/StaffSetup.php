@@ -132,6 +132,17 @@ class StaffSetup extends CI_Controller {
     }
     
     
+    //Profile
+    public function profile($action=null){
+        $data["data"] = $this->work->select_data("staff", ["staff_status"=>1]);
+		$this->load->view("header/header.php");
+        $this->load->view("sidebar/sidebar.php");
+        $this->load->view("header/topmenu.php");
+		$this->load->view("staff-profile/profile.php", $data);
+		$this->load->view("footer/footer.php");
+    } 
+    
+    
     //Add Subject
     public function addStaff($action = null){
 		if($action == "add"){
@@ -146,7 +157,7 @@ class StaffSetup extends CI_Controller {
 					"gender" => $this->input->post("gender"),	
 					"mobile_number" => $this->input->post("mobile_number"),	
 					"email" => $this->input->post("email"),	
-					"password" => rand(11111,99999),	
+					"password" => md5(rand(11111,99999)),	
 					"profile_pic" => "",	
 					"address" => $this->input->post("address")
 				];
@@ -232,6 +243,7 @@ class StaffSetup extends CI_Controller {
     //Update Subject
 	public function updateData($row_id=null){
 		$this->form_validation->set_rules("staff_name","Staff Name", "trim|required");
+		$this->form_validation->set_rules("gender","Gender", "trim|required");
         $this->form_validation->set_rules("mobile_number","Mobile Number", "trim|required|exact_length[10]|numeric");
         $this->form_validation->set_rules("email","Email", "trim|required|valid_email");
         $this->form_validation->set_rules("staff_status","Status", "trim|required");
@@ -240,12 +252,13 @@ class StaffSetup extends CI_Controller {
         if($this->form_validation->run()){
             $data = [
 					"staff_name" => $this->input->post("staff_name"),	
+					"gender" => $this->input->post("gender"),	
 					"staff_status" => $this->input->post("staff_status"),	
 					"mobile_number" => $this->input->post("mobile_number"),	
 					"email" => $this->input->post("email"),	
 					"address" => $this->input->post("address")
 				];
-            if($this->work->update_data("staff", $data, ["id"=>$this->input->post("staff_id")])){
+            if($this->work->update_data("staff", $data, ["id"=>$this->input->post("id")])){
                 $response["alert"] = "Updated !!";
                 $response["message"] = "Staff successfully updated !!";
                 $response["status"] = 1;
@@ -257,6 +270,10 @@ class StaffSetup extends CI_Controller {
 
                 $response["rowId"] = "row-".$this->input->post("staff_id");
                 $response["updatedRow"] = $html;
+                
+                //this used to update profile from staff itself
+                $response["redirect"] = base_url("staffSetup/profile");
+                $this->session->set_flashdata("success", "<div class='alert alert-success'>Profile updated!!</div>");
 
             }else{
                 $response["alert"] = "Oops error !!";
@@ -266,8 +283,8 @@ class StaffSetup extends CI_Controller {
             }
         }else{
             $response["staff_name"] = strip_tags(form_error('staff_name'));
+            $response["gender"] = strip_tags(form_error('gender'));
             $response["mobile_number"] = strip_tags(form_error('mobile_number'));
-            $response["staff_status"] = strip_tags(form_error('staff_status'));
             $response["email"] = strip_tags(form_error('email'));
             $response["address"] = strip_tags(form_error('address'));
             $response['status'] = 0;
@@ -283,10 +300,13 @@ class StaffSetup extends CI_Controller {
 		$data["value"] = $this->work->select_data("staff", ["id"=>$id]);
 		$response["staff_id"] = $data["value"][0]->id;
 		$response["staff_name"] = $data["value"][0]->staff_name;
+		$response["gender"] = $data["value"][0]->gender;
 		$response["mobile_number"] = $data["value"][0]->mobile_number;
 		$response["email"] = $data["value"][0]->email;
-		$response["staff_status"] = $data["value"][0]->staff_status;
 		$response["address"] = $data["value"][0]->address;
+		$response["staff_status"] = $data["value"][0]->staff_status;
+		$response["status"] = 1;
+        
 		echo json_encode($response);
     }
     
@@ -312,7 +332,60 @@ class StaffSetup extends CI_Controller {
 		}
 		echo json_encode($response);
 	}
+    
+    //Update Pasword
+    public function updatePassword(){
+        $this->form_validation->set_rules("id", "id", "required");
+        $this->form_validation->set_rules("old_password", "Old Password", "required|trim|callback_old_is_match");
+        $this->form_validation->set_rules("new_password", "New Password", "required|trim");
+        $this->form_validation->set_rules("confirm_password", "Confirm Password", "required|trim|matches[new_password]");
 
+        if($this->form_validation->run()){
+            $reg_id = $this->session->userdata("id");
+            if($this->work->update_data("staff", ['password'=>md5($this->input->post("confirm_password"))], ["id"=>$this->input->post("id")])){
+                $response['status'] = 1;
+                $response['alert'] = "Updated!!";
+                $response['message'] = "Password Updated successfully!!";
+                $response['modal'] = "success";
+            }else{
+                $response['status'] = 2;
+                $response['alert'] = "Oops error!!";
+                $response['message'] = "Password does't updated!!";
+                $response['modal'] = "error";
+            }
+        }else{
+            $response['status'] = 0;
+            $response["old_password"] = strip_tags(form_error("old_password"));
+            $response["new_password"] = strip_tags(form_error("new_password"));
+            $response["confirm_password"] = strip_tags(form_error("confirm_password"));
+        }
+        echo json_encode($response);
+    }
+    
+    //Old password is matched or not
+	public function old_is_match($pwd){
+        $data = $this->work->select_data("staff", ["id"=>$this->input->post("id")]);
+        $old_password = $data[0]->password;
+        if($pwd == ""){
+            return true;
+        }else{
+            if(md5($pwd) === $old_password){
+                return TRUE;
+            }else{
+                $this->form_validation->set_message('old_is_match', 'Old Password is not matched');
+                return FALSE;
+            }
+        }
+    }
+    
+    //Logout Section
+	public function logout(){
+		$this->session->unset_userdata("id");
+		$this->session->unset_userdata("display_name");
+		$this->session->unset_userdata("session_id");
+		$this->session->unset_userdata("type");
+		redirect(base_url("staffauth"));
+	}
 }
 
 

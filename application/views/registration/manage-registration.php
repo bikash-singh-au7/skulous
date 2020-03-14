@@ -69,7 +69,7 @@
                                                     ?>
                                                 </td>
 
-                                                <td class="text-center"><?= date("h:m A", strtotime($value->created_date)) ?></td>
+                                                <td class="text-center"><?= date("d-M-Y", strtotime($value->created_date)) ?></td>
                                                 
                                                 
                                                 

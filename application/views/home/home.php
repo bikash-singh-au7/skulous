@@ -1,3 +1,8 @@
+<?php
+date_default_timezone_set("Asia/Kolkata");
+$today = date("Y-m-d");
+
+?>
 <div class="container-fluid">
    <!--
     <div class="row">
@@ -75,7 +80,7 @@
     <!---Color card--->
     <div class="row">
         <div class="col-lg-3">     <!--Total Student Section-->
-           <a href="#">
+           <a href="<?= base_url('regSetup/registration/report')?>">
                <div class="card color-card bg-info">
                  <i id="fa" class="fa fa-graduation-cap"></i> 
                  <span>
@@ -94,8 +99,8 @@
            </a>
          </div> 
          
-        <div class="col-lg-3">     <!--Total Student Section-->
-           <a href="#">
+        <div class="col-lg-3">     <!--Total Inquiry-->
+           <a href="<?= base_url('inquirySetup/inquiry/manage')?>">
                <div class="card color-card bg-danger">
                 <i id="fa" class="fa fa-users"></i> 
                  <span>
@@ -113,7 +118,7 @@
            </a>
          </div>
          
-        <div class="col-lg-3">     <!--Total Student Section-->
+        <div class="col-lg-3">     <!--Total Fee Collection-->
            <a href="#">
                <div class="color-card bg-success">
                 <i id="fa" class="fa fa-rupee-sign"></i> 
@@ -138,6 +143,21 @@
                 <i id="fa" class="fa fa-user" ></i> 
                  <span>
                  <?php
+                    $cond = [
+                            "session_id"=>$this->session->userdata("session_id"),
+                        ];
+
+                    $unpaid_student = [];
+                    $student_query = $this->work->select_data("registration", $cond);
+                    foreach($student_query as $res){
+                        $id = $res->id;
+                        $is_paid = $this->work->select_data("payment", ["reg_id"=>$id]);
+                        if(empty($is_paid[0])){
+                            $unpaid_student[] = $res;
+                        }
+                    }
+
+                    echo count($unpaid_student);
                     
                      
                  ?>
@@ -164,28 +184,34 @@
                </div>
            </a>
         </div> 
-        <div class="col-lg-4">     <!--Total Student Section-->
+        <div class="col-lg-4">     <!--Today Fee Collection-->
            <a href="#">
                <div class="card white-card">
                  <i id="fa" class="fa fa-rupee-sign"></i> 
                  <span>
                      <?php
-                        echo 0;
-                     ?>
+                        $today_fee_collection = $this->work->select_sum("payment", ["session_id"=>$this->session->userdata("session_id"), "payment_date"=>$today], "amount");  
+                        if($today_fee_collection[0]->amount == 0){
+                            echo 0;
+                        }else{
+                            echo $total_fee_collection[0]->amount;
+                        }  
+                     ?>  
                  </span> 
                  <p>Today Fee Collaction</p>   
                </div>
            </a>
         </div>
         
-        <div class="col-lg-4">     <!--Total Student Section-->
+        <div class="col-lg-4">     <!--Total Batch-->
            <a href="#">
                <div class="card white-card">
                  <i id="fa" class="fa fa-users"></i> 
                  <span>
                      <?php
-                        echo 0;
-                     ?>
+                        $total_batch = $this->work->select_data("batch", ["session_id"=>$this->session->userdata("session_id")]);  
+                        echo count($total_batch);
+                     ?>  
                  </span> 
                  <p>Total Batchs</p>   
                </div>
@@ -347,10 +373,24 @@
     
 <!--- Script for chart --->
 <?php
+
     $dataPoints = [];
-    $dataPoints[] = ["label" => "1", "y" => 100];
-    $dataPoints[] = ["label" => "2", "y" => 300];
-    $dataPoints[] = ["label" => "3", "y" => 400];
+
+    $total_batch = $this->work->select_data("batch", ["session_id"=>$this->session->userdata("session_id")]);
+    if(!empty($total_batch)){
+        foreach($total_batch as $row){
+            $batch_id = $row->id;
+            $batch_name = $row->batch_name;
+            $batch_start_time = date("h:m A", strtotime($row->batch_start_time));
+            $batch_end_time = date("h:m A", strtotime($row->batch_end_time));
+            
+            $student_info = $this->work->select_data("registration", ["batch_id"=>$batch_id]);
+            $total_student_in_batch = count($student_info);
+            
+            $dataPoints[] = ["label" => $batch_start_time."-".$batch_end_time, "y" => $total_student_in_batch];
+        }
+    }
+
 ?>
 <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 <script>

@@ -73,10 +73,10 @@ if($action == "update"){
 
                     if($value->inquiry_status == 1){
                         $status = 1;
-                        echo"<span class='badge badge-info'>Resolved</span>";
+                        echo"<button onclick=statusChange('".$value->id."','0') class='badge badge-info rounded-0 border-0'>Resolved</button>";
                     }else{
                         $status = 0;
-                        echo"<span class='badge badge-danger'>Pending</span>";
+                        echo"<button onclick=statusChange('".$value->id."','1') class='badge badge-danger rounded-0 border-0'>Pending</button>";
                     }
 
                 ?>

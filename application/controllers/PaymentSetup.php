@@ -526,7 +526,7 @@ class PaymentSetup extends CI_Controller {
             
         
 		if($this->work->delete_data("payment", ["id"=>$id])){
-			$response["rowId"] = "pay".$id;
+			$response["delRowId"] = "pay".$id;
 			$response["alert"] = "Data deleted!";
 			$response["message"] = "Payment deleted successfully !!";
             $response["modal"] = "success";
@@ -562,6 +562,7 @@ class PaymentSetup extends CI_Controller {
         //Payment_id name is present in delete modal. For reg_id
 		$reg_id = $this->input->post("payment_id");
 		if($this->work->delete_data("payment", ["reg_id"=>$reg_id])){
+			$response["number"] = "all";
 			$response["rowId"] = "row-".$reg_id;
 			$response["alert"] = "Data deleted!</div>";
 			$response["message"] = "Payment deleted successfully !!";

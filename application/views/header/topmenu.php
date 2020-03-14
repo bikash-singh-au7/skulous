@@ -33,13 +33,13 @@
                            <?php
                                 if($this->session->userdata("type") == "staff"){
                                     $profile_url = base_url("StaffSetup/profile");
-                                    $setting_url = base_url("StaffSetup/setting");
-                                    $logout_url = base_url("welcome/stafflogout");
+                                    $setting_url = base_url("StaffSetup/profile");
+                                    $logout_url = base_url("StaffSetup/logout");
                                     $type = "Staff";
                                 }else{
                                     $profile_url = base_url("AdminSetup/profile");
                                     $setting_url = base_url("AdminSetup/setting");
-                                    $logout_url = base_url("welcome/logoutogout");
+                                    $logout_url = base_url("welcome/logout");
                                     $type = "Admin";
                                 }
                                 

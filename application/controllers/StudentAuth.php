@@ -15,7 +15,7 @@ class StudentAuth extends CI_Controller{
         if($this->form_validation->run()){
             $data = [
                 "student_mobile" => $_POST["user_name"],
-                "password" => $_POST["user_password"],
+                "password" => md5($_POST["user_password"]),
                 "reg_status" => 1
             ];
             $this->load->model("work");            

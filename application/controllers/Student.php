@@ -47,7 +47,7 @@ class Student extends CI_Controller {
 
             if($this->form_validation->run()){
                 $reg_id = $this->session->userdata("id");
-                if($this->work->update_data("registration", ['password'=>$this->input->post("confirm_password")], ["id"=>$reg_id])){
+                if($this->work->update_data("registration", ['password'=>md5($this->input->post("confirm_password"))], ["id"=>$reg_id])){
                     $response['alert'] = "Updated!!";
                     $response['message'] = "Password Updated successfully!!";
                     $response['modal'] = "success";
@@ -86,7 +86,7 @@ class Student extends CI_Controller {
         if($pwd == ""){
             return true;
         }else{
-            if($pwd === $old_password){
+            if(md5($pwd) === $old_password){
                 return TRUE;
             }else{
                 $this->form_validation->set_message('old_is_match', 'Old Password is not matched');

@@ -21,17 +21,17 @@
                                     <form action="" method="post" id="updateForm">
                                         <div class="form-group">
                                             <label for="">Old Password</label>
-                                            <input type="text" class="form-control" name="old_password" id="old_password">
+                                            <input type="password" class="form-control" name="old_password" id="old_password">
                                             <span class="text-danger" id="e_old_password"></span>
                                         </div>
                                         <div class="form-group">
                                             <label for="">New Password</label>
-                                            <input type="text" class="form-control" name="new_password" id="new_pasword">
+                                            <input type="password" class="form-control" name="new_password" id="new_pasword">
                                             <span class="text-danger" id="e_new_password"></span>
                                         </div>
                                         <div class="form-group">
                                             <label for="">Confirm Password</label>
-                                            <input type="text" class="form-control" name="confirm_password" id="confirm_pasword">
+                                            <input type="password" class="form-control" name="confirm_password" id="confirm_pasword">
                                             <span class="text-danger" id="e_confirm_password"></span>
                                         </div>
                                         

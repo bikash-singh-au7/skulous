@@ -10,14 +10,17 @@ class StaffAuth extends CI_Controller{
     }
     public function index(){
         $this->form_validation->set_error_delimiters('<div class="error">', '</div>');
-        $this->form_validation->set_rules('user_name', 'Username', 'required|min_length[5]|max_length[12]|alpha_numeric');
-        $this->form_validation->set_rules('user_password', 'Password', 'required|min_length[5]|max_length[12]|alpha_numeric');
+        $this->form_validation->set_rules('user_name', 'Username', 'required|min_length[5]|max_length[12]|alpha_numeric|trim');
+        $this->form_validation->set_rules('user_password', 'Password', 'required|min_length[5]|max_length[12]|alpha_numeric|trim');
         if($this->form_validation->run()){
             $data = [
                 "mobile_number" => $_POST["user_name"],
-                "password" => $_POST["user_password"],
+                "password" => md5($_POST["user_password"]),
                 "staff_status" => 1
             ];
+            
+            
+            
             
             $this->load->model("work");            
             $val = $this->work->login("staff", $data);

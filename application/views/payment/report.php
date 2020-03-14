@@ -775,9 +775,9 @@
         $("#number").val(number);
         if(number == "all"){
             $("#deleteAlert").html("In this Case all payment will deleted of this student!!")
-        }else[
+        }else{
             $("#deleteAlert").html("")
-        ]
+        }
         
     }
     $(document).ready(function(){
@@ -795,10 +795,12 @@
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function(response){
-                    if(response["number"] == "one"){
-                        $("#"+response["rowId"]).html(response["html"]);
-                    }else{
+                    if(response["number"] == "all"){
                         $("#"+response["rowId"]).remove();
+                        alert(response["rowId"]);
+                    }else{
+                        $("#"+response["rowId"]).html(response["html"]);
+                        $("#"+response["delRowId"]).remove();
                     }
                     
                     $("#deleteModal").modal("hide");

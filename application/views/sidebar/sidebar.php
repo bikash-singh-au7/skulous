@@ -36,7 +36,7 @@
                     <i class="fa fa-home" id="fa"></i> Dashboard</a>
                     <ul class="collapse list-unstyled" id="homeSubmenu">
                         <li>
-                            <a href="">Dashboard</a>
+                            <a href="<?= base_url()?>">Dashboard</a>
                         </li>
                         
                     </ul>
@@ -180,33 +180,12 @@
                 <?php 
                 if($sms_permission){
                     ?>
-                <li>
-                    <a href="#smsSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                    <i class="fa fa-envelope" id="fa"></i> Message/Sms</a>
-                    <ul class="collapse list-unstyled" id="smsSubmenu">
-                        <li> <a href="">Send SMS To Inquiry</a> </li>
-                        <li> <a href="">Send SMS To Student</a> </li>    
-                        <li> <a href="">Send SMS To Staff</a> </li>
-                        <li> <a href="">Send Student Id/Password</a> </li>
-                        <li> <a href="">Send Student Birthday SMS</a> </li>
-                        <li> <a href="">Check Delevery Report</a> </li>
-                    </ul>
-                </li>
+                <li><a href="<?= base_url('smssetup/sms')?>"><i class="fa fa-envelope" id="fa"></i> Message/Sms</a></li>
                 <?
                 }
                 ?>
                 
-                <li>
-                    <a href="#helpSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                    <i class="fa fa-question-circle" id="fa"></i> Help & Support</a>
-                    <ul class="collapse list-unstyled" id="helpSubmenu">
-                        <li> <a href="#">Support Request</a> </li>
-                        <li> <a href="#">Support History</a> </li>    
-                        <li> <a href="#">Feedback</a> </li>
-                        <li> <a href="#">Contact Us</a> </li>
-                        <li> <a href="#">Demo Video</a> </li>
-                    </ul>
-                </li>
+                <li><a href="<?= base_url('helpsupport')?>"> <i class="fa fa-question-circle" id="fa"></i> Help & Support</a></li>
                 
             </ul>
         </nav>

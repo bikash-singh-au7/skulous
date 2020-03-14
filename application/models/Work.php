@@ -26,6 +26,7 @@ class Work extends CI_Model{
         return $data->result();
         
     }
+    
     public function select_destnict_data($table, $cond=null, $dist="id"){
         if($cond == null){
             $query = $this->db->distinct($dist)
@@ -103,9 +104,16 @@ class Work extends CI_Model{
     }   
     //Select Max
     public function select_max($table, $cond=null, $col=null){
-        $this->db->where($cond);
-        $this->db->select_max($col);
-        $query = $this->db->get($table);
+        if($cond == null){
+//            $this->db->select_max('age');
+//            $query = $this->db->get('members');
+            $this->db->select_max($col);
+            $query = $this->db->get($table);
+        }else{
+            $this->db->where($cond);
+            $this->db->select_max($col);
+            $query = $this->db->get($table);
+        }
         return $query->result();
     }
     

@@ -535,12 +535,6 @@ class Welcome extends CI_Controller {
 	}
     
     
-	//Logout Section
-	public function staffLogout(){
-		$this->session->unset_userdata("id");
-		$this->session->unset_userdata("display_name");
-		$this->session->unset_userdata("session_id");
-		redirect(base_url("staffauth"));
-	}
+	
 	
 }

@@ -153,6 +153,14 @@ class SessionSetup extends CI_Controller {
 				"session_status" => $this->input->post("session_status")
 			];
 			if($this->work->update_data("session", $data, ["id"=>$this->input->post("session_id")])){
+                
+                if($this->input->post("session_status") == 0){
+                    if($this->input->post("session_id") == $this->session->userdata("session_id")){
+                        $this->session->set_flashdata("alert", "<div class='alert alert-success rounded-0'>You Disable the current session please select session first.</div>");
+                        $this->session->unset_userdata("session_id");
+                    }
+                }
+                
                 $response["alert"] = "Updated !";
 				$response["message"] = "Session successfully updated.";
 				$response["modal"] = "success";
@@ -164,6 +172,8 @@ class SessionSetup extends CI_Controller {
 				
 				$response["rowId"] = "row-".$this->input->post("session_id");
 				$response["updatedRow"] = $html;
+                
+                
 				
 			}else{
 				$response["alert"] = "Oops error !";

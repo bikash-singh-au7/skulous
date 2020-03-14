@@ -122,6 +122,12 @@ class RegSetup extends CI_Controller {
                     $format_string = $format_string[0]->format_string;
                     $str_arr = explode ("-", $format_string);  
                     $student_id = "";
+                    
+                    //Generate Password
+                    $string = str_split($this->input->post("student_name"), 2);
+                    $dateOfYear = date("Y", strtotime($this->input->post("dob")));
+                    $password_w_md5 = strtoupper($string[0]).$dateOfYear;
+                    $password = md5($password_w_md5);
                     foreach($str_arr as $str){
                         if($str === "Y"){
                             $value = $this->work->select_data("session", ["id"=>$this->session->userdata("session_id")]);
@@ -139,12 +145,12 @@ class RegSetup extends CI_Controller {
                             $value = $this->work->select_data("admin", ["id"=>$this->session->userdata("id")]);
                             $student_id = $student_id.$value[0]->institute_code;
                         }elseif(is_numeric($str)){
-                            $max_id = $this->work->select_max("registration", ["session_id"=>$this->session->userdata("session_id")], "id");
+                            $max_id = $this->work->select_max("registration",null, "id");
 
                             if($max_id[0]->id == 0){
                                 $max_id = 1;
                             }else{
-                                $max_id = $max_id[0]->id;
+                                $max_id = $max_id[0]->id+1;
                             }
 
                             $student_id = $student_id.sprintf("%0".$str."d", $max_id);
@@ -162,7 +168,7 @@ class RegSetup extends CI_Controller {
                         "mother_name" => strtoupper($this->input->post("mother_name")),	
                         "student_mobile" => $this->input->post("student_mobile"),	
                         "student_email" => $this->input->post("student_email"),	
-                        "password" => rand(11111,99999),	
+                        "password" => $password,	
                         "parent_mobile" => $this->input->post("parent_mobile"),	
                         "parent_email" => $this->input->post("parent_email"),	
                         "address" => strtoupper($this->input->post("address")),	
@@ -177,6 +183,14 @@ class RegSetup extends CI_Controller {
                     ];
                     if($this->work->insert_data("registration", $data)){
                         
+                        //=========================\
+                        //Send sms
+                        $mobile_number = $this->input->post("student_mobile");
+                        $student_name = $this->input->post("student_name");
+                        $student_id = $student_id;
+                        $msg = "Dear mr/ms ".$student_name." your admission is successful. Your student id is :".$student_id." and password is : ".$password_w_md5." For more login www.vijayphysics.com/student";
+                        
+                        $this->work->send_sms($mobile_number, $msg);
                         
                         //=============================================
                         //For Payment
@@ -185,9 +199,11 @@ class RegSetup extends CI_Controller {
                         //now payment amount
                         $payment_amount = $this->input->post("payment_amount");
                         
+                        //created last id
+                        $reg_id = $this->db->insert_id();
+                        
                         if($payment_amount != ""){
-                            //created last id
-                            $reg_id = $this->db->insert_id();
+                            
                             //get batch fee and batch discount if available
                             $batch_info = $this->work->select_data("batch", ["id"=>$this->input->post("batch_id")]);
                             $batch_fee = $batch_info[0]->batch_fee;
@@ -214,6 +230,12 @@ class RegSetup extends CI_Controller {
                             ];
                             if($this->work->insert_data("payment", $data)){
                                 $response["payment_alert"] = "1";
+                                
+                                //Send sms after payment
+                                $msg = "Dear mr/ms ".$student_name." you paid ".$payment_amount.". Payment date is : ".$this->input->post("payment_date")." For more login www.vijayphysics.com/student";
+
+                                $this->work->send_sms($mobile_number, $msg);
+                                
                                 //update registration table if full paid
                                 if($full_paid){
                                     if($this->work->update_data("registration", ["full_paid"=>$full_paid], ["id"=>$reg_id])){

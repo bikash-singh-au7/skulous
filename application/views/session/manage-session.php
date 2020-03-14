@@ -312,7 +312,8 @@
                           response["modal"]
                         );
                         $("#"+response["rowId"]).html(response["updatedRow"]);
-
+                            
+                        
                     }
                 }
             });

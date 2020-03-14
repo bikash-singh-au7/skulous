@@ -19,7 +19,7 @@
                         </div>
                         <div class="col-md-12 p-0 m-0">
                             <div class="float-left px-2 py-2">
-                                <p class="text-muted font-weight-bold m-0"> <i class="fa fa-user"></i> Admin Profile </p>
+                                <p class="text-muted font-weight-bold m-0"> <i class="fa fa-user"></i> Staff Profile </p>
                             </div>
                             <div class="float-right px-2 py-1">
                                 <button class="btn btn-success" onclick="updateData('<?= $data[0]->id?>')"> <span class="fa fa-edit"></span> Edit Profile  
@@ -36,9 +36,9 @@
                                 <img src="https://www.freeiconspng.com/uploads/male-icon-4.jpg" alt="" class="img profile-pic">
                             </div>
                             <div class="float-right">
-                                <h5 class="text-info">  <i class="fa fa-user"></i> <?= $data[0]->admin_name?></h5>
-                                <p class="p-0 m-0"> <i class="fa fa-phone"></i> <?= $data[0]->admin_mobile?></p>
-                                <p class="p-0 m-0">  <i class="fa fa-envelope"></i> <?= $data[0]->admin_email?></p>
+                                <h5 class="text-info">  <i class="fa fa-user"></i> <?= $data[0]->staff_name?></h5>
+                                <p class="p-0 m-0"> <i class="fa fa-phone"></i> <?= $data[0]->mobile_number?></p>
+                                <p class="p-0 m-0">  <i class="fa fa-envelope"></i> <?= $data[0]->email?></p>
                             </div>
                         </div>
                         
@@ -48,28 +48,12 @@
                                 <tr class="text-muted">
                                     <th>User Name</th>
                                     <th>Password</th>
-                                    <th>Last Update</th>
                                     <th>Change Pasword</th>
                                 </tr>
                                 <tr class="text-muted">
-                                    <td><?= $data[0]->user_name?></td>
+                                    <td><?= $data[0]->mobile_number?></td>
                                     <td>*****</td>
-                                    <td><?= date("d-M-Y", strtotime($data[0]->modified_date))?></td>
                                     <td class="text-center"> <button class="btn btn-info px-2 py-1" onclick="changePassword('<?= $data[0]->id?>')"> <i class="fa fa-edit"></i> </button> </td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-12 bg-white py-2 mt-2 shadow-sm">
-                            <p class="text-info font-weight-bold"> <i class="fa fa-industry"></i> Institute Information</p>
-                            <table class="table table-hover table-bordered">
-                                <tr class="text-muted">
-                                    <th>Institute Name</th>
-                                    <th>Institute Code</th>
-                                </tr>
-                                <tr class="text-muted">
-                                    <td><?= $data[0]->institute_name?></td>
-                                    <td><?= $data[0]->institute_code?></td>
-                                    
                                 </tr>
                             </table>
                         </div>
@@ -95,44 +79,49 @@
                 <form action="" method="post" id="updateForm">
                     <div class="form-group">
                         <label for="">Name <span class="text-danger">*</span></label>
-                        <input type="text" name="admin_name" class="form-control" placeholder="Name here" id="admin_name">
-                        <span class="text-danger" id="e_admin_name"></span>
+                        <input type="text" name="staff_name" class="form-control" placeholder="Name here" id="staff_name">
+                        
+                        <input type="hidden" name="staff_status" class="form-control" value="1">
+                        
+                        <span class="text-danger" id="e_staff_name"></span>
                         <input type="hidden" name="id" class="form-control" id="id">
                     </div>
 
+                    
                     <div class="form-group">
-                        <label for="">Institute Name <span class="text-danger">*</span></label>
-                        <input type="text" name="institute_name" class="form-control" value="" placeholder="Institute Name" id="institute_name">
-                        <span class="text-danger" id="e_institute_name"></span>
+                        <label for="">Gender <span class="text-danger">*</span></label>
+                        <select name="gender" id="gender" class="form-control">
+                            <option value="">--Gender--</option>
+                            <option value="MALE">MALE</option>
+                            <option value="FEMALE">FEMALE</option>
+                        </select>
+                        <span class="text-danger" id="e_gender"></span>
 
-                    </div>
-                    <div class="form-group">
-                        <label for="">Institute Code <span class="text-danger">*</span></label>
-                        <input type="text" name="institute_code" class="form-control" value="" placeholder="Institute Code" id="institute_code">
-                        <span class="text-danger" id="e_institute_code"></span>
                     </div>
                     
                     <div class="form-group">
                         <label for="">Mobile Number <span class="text-danger">*</span></label>
-                        <input type="tel" name="admin_mobile" class="form-control" value="" placeholder="Mobile Number" id="admin_mobile">
-                        <span class="text-danger" id="e_admin_mobile"></span>
+                        <input type="tel" name="mobile_number" class="form-control" value="" placeholder="Mobile Number" id="mobile_number">
+                        <span class="text-danger" id="e_mobile_number"></span>
 
                     </div>
                     
                     
                     <div class="form-group">
                         <label for="">Email Id <span class="text-danger">*</span></label>
-                        <input type="email" name="admin_email" class="form-control" value="" placeholder="Email" id="admin_email">
-                        <span class="text-danger" id="e_admin_email"></span>
+                        <input type="email" name="email" class="form-control" value="" placeholder="Email" id="email">
+                        <span class="text-danger" id="e_email"></span>
 
                     </div>
+                  
                     
                     <div class="form-group">
-                        <label for="">User Name <span class="text-danger">*</span></label>
-                        <input type="text" name="user_name" class="form-control" value="" placeholder="User Name" id="user_name">
-                        <span class="text-danger" id="e_user_name"></span>
-                    </div>
+                        <label for="">Address <span class="text-danger">*</span></label>
+                        <input type="text" name="address" class="form-control" value="" placeholder="Address" id="address">
+                        <span class="text-danger" id="e_address"></span>
 
+                    </div>
+                  
                 </form>
             </div>
             <div class="modal-footer">
@@ -161,7 +150,7 @@
                             <div class="form-group">
                                 <label for="">Old Password</label>
                                 <input type="text" class="form-control" name="old_password" id="old_password">
-                                <input type="hidden" name="admin_id" id="admin_id">
+                                <input type="hidden" name="id" id="staff_id">
                                 <span class="text-danger" id="e_old_password"></span>
                             </div>
                             <div class="form-group">
@@ -192,19 +181,18 @@
 
 <!---Ajax here-->
 <script>
-    //Make Payment
+    //Update Data
     function updateData(id){
         $("#updateModal").modal("show");
-        $("#e_admin_name").html("");
-        $("#e_institute_name").html("");
-        $("#e_institute_code").html("");
-        $("#e_admin_mobile").html("");
-        $("#e_admin_email").html("");
-        $("#e_user_name").html("");
+        $("#e_staff_name").html("");
+        $("#e_gender").removeAttr("selected");
+        $("#e_mobile_number").html("");
+        $("#e_email").html("");
+        $("#e_address").html("");
         $.ajax({
-            url: "<?= base_url('adminSetup/getData')?>",
+            url: "<?= base_url('staffSetup/getData')?>",
             type: "POST",
-            data : {id:id},
+            data : {staff_id:id},
             dataType: "json",
             beforeSend:function(){
                 $("#editDataLoader").show();
@@ -215,12 +203,11 @@
             success: function(response){
                 if(response["status"]==1){
                     $("#id").val(id);
-                    $("#admin_name").val(response["admin_name"]);
-                    $("#institute_name").val(response["institute_name"]);
-                    $("#institute_code").val(response["institute_code"]);
-                    $("#admin_mobile").val(response["admin_mobile"]);
-                    $("#admin_email").val(response["admin_email"]);
-                    $("#user_name").val(response["user_name"]);
+                    $("#staff_name").val(response["staff_name"]);
+                    $("#gender option[value="+response["gender"]+"]").attr('selected', 'selected');
+                    $("#mobile_number").val(response["mobile_number"]);
+                    $("#email").val(response["email"]);
+                    $("#address").val(response["address"]);
                 }else{
                     $("#updateModal").modal("hide");
                     Swal.fire(
@@ -238,7 +225,7 @@
         $("#updateForm").on("submit", function(e){
             e.preventDefault();
             $.ajax({
-                url: "<?= base_url('adminSetup/updateData')?>",
+                url: "<?= base_url('staffSetup/updateData')?>",
                 type: "POST",
                 data : $(this).serialize(),
                 dataType: "json",
@@ -250,20 +237,11 @@
                 },
                 success: function(response){
                     if(response["status"]==0){
-                        $("#e_admin_name").html(response["admin_name"]);
-                        $("#e_institute_name").html(response["institute_name"]);
-                        $("#e_institute_code").html(response["institute_code"]);
-                        $("#e_admin_mobile").html(response["admin_mobile"]);
-                        $("#e_admin_email").html(response["admin_email"]);
-                        $("#e_user_name").html(response["user_name"]);
-                    }else if(response["status"]==2){
-                        $("#updateModal").modal("hide");
-                        Swal.fire(
-                          response["alert"],
-                          response["message"],
-                          response["modal"]
-                        )
-                             
+                        $("#e_staff_name").html(response["staff_name"]);
+                        $("#e_gender").html(response["gender"]);
+                        $("#e_mobile_number").html(response["mobile_number"]);
+                        $("#e_email").html(response["email"]);
+                        $("#e_address").html(response["address"]);
                     }else{
                         window.location = response["redirect"];
                     }
@@ -276,7 +254,7 @@
     
     function changePassword(id){
         $("#changePasswordModal").modal("show");
-        $("#admin_id").val(id);
+        $("#staff_id").val(id);
         
         $("#e_old_password").html("");
         $("#e_new_password").html("");
@@ -286,7 +264,7 @@
     $("#changePasswordForm").on("submit", function(e){
         e.preventDefault();
         $.ajax({
-            url:"<?= base_url('adminsetup/setting/update')?>",
+            url:"<?= base_url('staffsetup/updatePassword')?>",
             data: $(this).serialize(),
             dataType: 'json',
             type: 'POST',
@@ -295,10 +273,7 @@
                     $("#e_old_password").html(response["old_password"]);
                     $("#e_new_password").html(response["new_password"]);
                     $("#e_confirm_password").html(response["confirm_password"]);
-                }else{
-                    // Set value
-                    $(".form-control").val("");
-                    
+                }else{                    
                     $("#changePasswordModal").modal("hide");
                     Swal.fire(
                       response["alert"],
